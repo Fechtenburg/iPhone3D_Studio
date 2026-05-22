@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,7 @@
             color: #ffffff;
             user-select: none;
         }
+
         #canvas-container {
             width: 100vw;
             height: 100vh;
@@ -22,6 +24,7 @@
             left: 0;
             z-index: 1;
         }
+
         #ui-layer {
             position: absolute;
             top: 20px;
@@ -35,8 +38,15 @@
             overflow-y: auto;
             padding-right: 10px;
         }
-        #ui-layer::-webkit-scrollbar { width: 4px; }
-        #ui-layer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+        #ui-layer::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #ui-layer::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
 
         #ui-layer2 {
             position: absolute;
@@ -51,9 +61,16 @@
             overflow-y: auto;
             padding-right: 10px;
         }
-        #ui-layer2::-webkit-scrollbar { width: 4px; }
-        #ui-layer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-        
+
+        #ui-layer2::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #ui-layer::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
         .panel {
             background: rgba(28, 28, 30, 0.85);
             backdrop-filter: blur(20px);
@@ -63,12 +80,27 @@
             border-radius: 16px;
             width: 310px;
             pointer-events: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
         }
-        h1 { font-size: 15px; margin: 0 0 4px 0; font-weight: 600; letter-spacing: -0.5px;}
-        p { font-size: 12px; color: #8e8e93; margin: 0 0 15px 0; line-height: 1.4; }
-        .control-group { margin-bottom: 18px; }
-        
+
+        h1 {
+            font-size: 15px;
+            margin: 0 0 4px 0;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 12px;
+            color: #8e8e93;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
         label {
             display: flex;
             justify-content: space-between;
@@ -79,8 +111,13 @@
             margin-bottom: 8px;
             font-weight: 600;
         }
-        label span { color: #0071e3; text-transform: none; font-family: monospace; }
-        
+
+        label span {
+            color: #0071e3;
+            text-transform: none;
+            font-family: monospace;
+        }
+
         .slider-input {
             width: 100%;
             background: #3a3a3c;
@@ -90,6 +127,7 @@
             outline: none;
             margin: 10px 0;
         }
+
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 14px;
@@ -98,7 +136,7 @@
             background: #0071e3;
             cursor: pointer;
         }
-        
+
         .btn {
             display: block;
             width: 100%;
@@ -114,9 +152,15 @@
             text-align: center;
             box-sizing: border-box;
         }
-        .btn:hover { background: #0077ed; }
-        #file-input { display: none; }
-        
+
+        .btn:hover {
+            background: #0077ed;
+        }
+
+        #file-input {
+            display: none;
+        }
+
         .drop-zone {
             border: 2px dashed rgba(255, 255, 255, 0.15);
             border-radius: 10px;
@@ -125,14 +169,15 @@
             font-size: 12px;
             color: #d1d1d6;
             cursor: pointer;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
         }
-        
+
         .preset-manager-grid {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
+
         .preset-row {
             display: flex;
             gap: 6px;
@@ -142,6 +187,7 @@
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.02);
         }
+
         .preset-name-input {
             flex-grow: 1;
             background: transparent;
@@ -153,7 +199,11 @@
             border-bottom: 1px solid transparent;
             width: 110px;
         }
-        .preset-name-input:focus { border-bottom-color: #0071e3; }
+
+        .preset-name-input:focus {
+            border-bottom-color: #0071e3;
+        }
+
         .btn-action {
             padding: 6px 10px;
             font-size: 11px;
@@ -162,10 +212,25 @@
             border: none;
             cursor: pointer;
         }
-        .btn-load { background: rgba(255,255,255,0.1); color: #fff; flex-shrink: 0; }
-        .btn-load:hover { background: rgba(255,255,255,0.2); }
-        .btn-save { background: rgba(0, 113, 227, 0.2); color: #0a84ff; }
-        .btn-save:hover { background: rgba(0, 113, 227, 0.3); }
+
+        .btn-load {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .btn-load:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-save {
+            background: rgba(0, 113, 227, 0.2);
+            color: #0a84ff;
+        }
+
+        .btn-save:hover {
+            background: rgba(0, 113, 227, 0.3);
+        }
 
         .footer-note {
             position: absolute;
@@ -173,19 +238,20 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             padding: 8px 18px;
             border-radius: 20px;
             font-size: 11px;
             color: #8e8e93;
             pointer-events: none;
             letter-spacing: 0.5px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
+
 <body>
 
     <div id="canvas-container"></div>
@@ -203,7 +269,7 @@
         <div class="panel">
             <h1>Studio Canvas Engine</h1>
             <p>Precise asset control and image generation.</p>
-            
+
             <div class="control-group">
                 <label>1. Texture Source</label>
                 <div class="drop-zone" id="drop-zone">Drop Screenshot Here</div>
@@ -241,7 +307,7 @@
             </div>
         </div>
 
-        
+
     </div>
 
     <div class="footer-note">Rotate 180° with Mouse to see corrected Titanium Gold Back & Cameras</div>
@@ -250,29 +316,31 @@
         // --- 1. CORE ENGINE INITIALIZATION ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        
+
         const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
         const defaultCamDistance = 50;
         camera.position.set(0, 0, defaultCamDistance);
 
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
-            alpha: true, 
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
             preserveDrawingBuffer: true,
             powerPreference: "high-performance"
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.max(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.25; 
+        renderer.toneMappingExposure = 1.25;
         renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         // --- 2. CONTROLS ---
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.15;
-        controls.enableZoom = true;   
+        controls.enableZoom = true;
         controls.enablePan = false;
         controls.minPolarAngle = THREE.MathUtils.degToRad(5);
         controls.maxPolarAngle = THREE.MathUtils.degToRad(175);
@@ -283,13 +351,33 @@
 
         const frontLight = new THREE.DirectionalLight(0xffffff, 0.6);
         frontLight.position.set(-5, 5, 12);
+        frontLight.castShadow = true;
+        frontLight.shadow.mapSize.width = 2048;
+        frontLight.shadow.mapSize.height = 2048;
+        frontLight.shadow.camera.near = 0.5;
+        frontLight.shadow.camera.far = 50;
+        frontLight.shadow.camera.left = -10;
+        frontLight.shadow.camera.right = 10;
+        frontLight.shadow.camera.top = 10;
+        frontLight.shadow.camera.bottom = -10;
+        frontLight.shadow.bias = -0.0005;
         scene.add(frontLight);
 
         const backKeyLight = new THREE.DirectionalLight(0xffffff, 1.4);
         backKeyLight.position.set(5, 8, -12);
+        backKeyLight.castShadow = true;
+        backKeyLight.shadow.mapSize.width = 2048;
+        backKeyLight.shadow.mapSize.height = 2048;
+        backKeyLight.shadow.camera.near = 0.5;
+        backKeyLight.shadow.camera.far = 50;
+        backKeyLight.shadow.camera.left = -10;
+        backKeyLight.shadow.camera.right = 10;
+        backKeyLight.shadow.camera.top = 10;
+        backKeyLight.shadow.camera.bottom = -10;
+        backKeyLight.shadow.bias = -0.0005;
         scene.add(backKeyLight);
 
-        const backFillLight = new THREE.DirectionalLight(0xeea38, 0.7); 
+        const backFillLight = new THREE.DirectionalLight(0xeea38, 0.7);
         backFillLight.position.set(-6, -4, -10);
         scene.add(backFillLight);
 
@@ -316,36 +404,52 @@
 
         function createRoundedRectShape(width, height, radius) {
             const shape = new THREE.Shape();
-            shape.moveTo(-width/2 + radius, -height/2); shape.lineTo(width/2 - radius, -height/2);
-            shape.quadraticCurveTo(width/2, -height/2, width/2, -height/2 + radius); shape.lineTo(width/2, height/2 - radius);
-            shape.quadraticCurveTo(width/2, height/2, width/2 - radius, height/2); shape.lineTo(-width/2 + radius, height/2);
-            shape.quadraticCurveTo(-width/2, height/2, -width/2, height/2 - radius); shape.lineTo(-width/2, -height/2 + radius);
-            shape.quadraticCurveTo(-width/2, -height/2, -width/2 + radius, -height/2);
+            shape.moveTo(-width / 2 + radius, -height / 2); shape.lineTo(width / 2 - radius, -height / 2);
+            shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + radius); shape.lineTo(width / 2, height / 2 - radius);
+            shape.quadraticCurveTo(width / 2, height / 2, width / 2 - radius, height / 2); shape.lineTo(-width / 2 + radius, height / 2);
+            shape.quadraticCurveTo(-width / 2, height / 2, -width / 2, height / 2 - radius); shape.lineTo(-width / 2, -height / 2 + radius);
+            shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + radius, -height / 2);
             return shape;
         }
 
         const chassisShape = createRoundedRectShape(w, h, r);
-        const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, { 
-            depth: d, bevelEnabled: true, bevelSegments: 8, steps: 1, bevelSize: 0.04, bevelThickness: 0.04 
+        const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, {
+            depth: d, bevelEnabled: true, bevelSegments: 8, steps: 1, bevelSize: 0.04, bevelThickness: 0.04
         });
         chassisGeo.center();
-        
-        const chassisMat = new THREE.MeshStandardMaterial({ color: 0xbfae99, metalness: 0.8, roughness: 0.25 });
+
+        const chassisMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, metalness: 0.9, roughness: 0.15, clearcoat: 0.1, clearcoatRoughness: 0.2 });
         const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+        chassis.castShadow = true;
+        chassis.receiveShadow = true;
         phoneGroup.add(chassis);
 
         // USB-C Port
         const darkPortMat = new THREE.MeshBasicMaterial({ color: 0x1d1814 });
         const usbcMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.2), darkPortMat);
-        usbcMesh.position.set(0, -(h/2) - 0.02, 0);
+        usbcMesh.position.set(0, -(h / 2) - 0.02, 0);
         phoneGroup.add(usbcMesh);
+
+        // Bottom Speaker & Mic Grilles
+        const holeGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.1, 16);
+        for (let i = 0; i < 4; i++) {
+            // Left side holes
+            const leftHole = new THREE.Mesh(holeGeo, darkPortMat);
+            leftHole.position.set(-0.65 - i * 0.25, -(h / 2) - 0.01, 0);
+            phoneGroup.add(leftHole);
+
+            // Right side holes
+            const rightHole = new THREE.Mesh(holeGeo, darkPortMat);
+            rightHole.position.set(0.65 + i * 0.25, -(h / 2) - 0.01, 0);
+            phoneGroup.add(rightHole);
+        }
 
         // Front Screen Panel Layout
         const bezelPadding = 0.24;
         const screenW = w - bezelPadding; const screenH = h - bezelPadding;
         const screenR = r - (bezelPadding / 2);
         const targetScreenShape = createRoundedRectShape(screenW, screenH, screenR);
-        
+
         const screenGeo = new THREE.ShapeGeometry(targetScreenShape);
         const posAttribute = screenGeo.attributes.position;
         const uvs = [];
@@ -356,147 +460,151 @@
 
         const screenMat = new THREE.MeshStandardMaterial({ map: screenTexture, roughness: 0.18, metalness: 0.0, side: THREE.DoubleSide });
         const screenMesh = new THREE.Mesh(screenGeo, screenMat);
-        screenMesh.position.z = (d / 2) + 0.05; 
+        screenMesh.position.z = (d / 2) + 0.05;
         phoneGroup.add(screenMesh);
 
         // Dynamic Island
         const islandShapeObj = new THREE.Shape();
         const iW = 1.68, iH = 0.42, iR = 0.21;
-        islandShapeObj.moveTo(-iW/2 + iR, -iH/2); islandShapeObj.lineTo(iW/2 - iR, -iH/2);
-        islandShapeObj.quadraticCurveTo(iW/2, -iH/2, iW/2, -iH/2 + iR); islandShapeObj.lineTo(iW/2, iH/2 - iR);
-        islandShapeObj.quadraticCurveTo(iW/2, iH/2, iW/2 - iR, iH/2); islandShapeObj.lineTo(-iW/2 + iR, iH/2);
-        islandShapeObj.quadraticCurveTo(-iW/2, iH/2, -iW/2, iH/2 - iR); islandShapeObj.lineTo(-iW/2, -iH/2 + iR);
-        islandShapeObj.quadraticCurveTo(-iW/2, -iH/2, -iW/2 + iR, -iH/2);
+        islandShapeObj.moveTo(-iW / 2 + iR, -iH / 2); islandShapeObj.lineTo(iW / 2 - iR, -iH / 2);
+        islandShapeObj.quadraticCurveTo(iW / 2, -iH / 2, iW / 2, -iH / 2 + iR); islandShapeObj.lineTo(iW / 2, iH / 2 - iR);
+        islandShapeObj.quadraticCurveTo(iW / 2, iH / 2, iW / 2 - iR, iH / 2); islandShapeObj.lineTo(-iW / 2 + iR, iH / 2);
+        islandShapeObj.quadraticCurveTo(-iW / 2, iH / 2, -iW / 2, iH / 2 - iR); islandShapeObj.lineTo(-iW / 2, -iH / 2 + iR);
+        islandShapeObj.quadraticCurveTo(-iW / 2, -iH / 2, -iW / 2 + iR, -iH / 2);
 
         const islandMesh = new THREE.Mesh(new THREE.ShapeGeometry(islandShapeObj), new THREE.MeshBasicMaterial({ color: 0x070709, side: THREE.DoubleSide }));
-        islandMesh.position.set(0, h/2 - 1.02, (d / 2) + 0.055);
+        islandMesh.position.set(0, h / 2 - 1.02, (d / 2) + 0.055);
         phoneGroup.add(islandMesh);
 
 
         // --- 6. ISOLATED BACK PLATE & LOGO GEOMETRY ---
         const backPanelGeo = new THREE.ShapeGeometry(targetScreenShape);
-        const backPanelMat = new THREE.MeshStandardMaterial({
-            color: 0xc4b29c,
-            roughness: 0.5,
-            metalness: 0.35,
+        const backPanelMat = new THREE.MeshPhysicalMaterial({
+            color: 0xbfae99,
+            roughness: 0.15,
+            metalness: 0.9,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.1,
             side: THREE.DoubleSide
         });
         const backPanelMesh = new THREE.Mesh(backPanelGeo, backPanelMat);
         backPanelMesh.rotation.y = Math.PI;
         backPanelMesh.position.set(0, 0, -(d / 2) - 0.05);
+        backPanelMesh.receiveShadow = true;
+        backPanelMesh.castShadow = true;
         phoneGroup.add(backPanelMesh);
 
-   function createAppleLogoShape() {
-    const shape = new THREE.Shape();
-    
-    // Scale factor and centering offsets derived from the AI vector grid
-    const S = 0.003;
-    const transformX = (x) => (x - 1900) * S;
-    const transformY = (y) => (y - 800) * S;
+        function createAppleLogoShape() {
+            const shape = new THREE.Shape();
 
-    // Start at the bottom central dip
-    shape.moveTo(transformX(2266), transformY(1570));
-    
-    // Top-Right Shoulder
-    shape.bezierCurveTo(transformX(2384.7), transformY(1571.4), transformX(2473.9), transformY(1531.1), transformX(2549), transformY(1488));
-    shape.bezierCurveTo(transformX(2564.5), transformY(1479.0), transformX(2576.6), transformY(1463.1), transformX(2591), transformY(1453));
-    shape.bezierCurveTo(transformX(2612.2), transformY(1438.0), transformX(2629.4), transformY(1416.7), transformX(2645), transformY(1396));
-    shape.bezierCurveTo(transformX(2647.5), transformY(1392.6), transformX(2659.6), transformY(1382.6), transformX(2658), transformY(1377));
-    shape.bezierCurveTo(transformX(2647.6), transformY(1370.6), transformX(2637.3), transformY(1364.3), transformX(2627), transformY(1358));
-    shape.bezierCurveTo(transformX(2601.5), transformY(1342.1), transformX(2572.3), transformY(1317.5), transformX(2553), transformY(1295));
-    
-    // The Bite Cutout (Traced directly into the path outline)
-    shape.bezierCurveTo(transformX(2476.5), transformY(1205.8), transformX(2419.2), transformY(1079.8), transformX(2457), transformY(911));
-    shape.bezierCurveTo(transformX(2477.5), transformY(819.0), transformX(2534.1), transformY(741.9), transformX(2597), transformY(691));
-    shape.bezierCurveTo(transformX(2619.9), transformY(672.4), transformX(2648.1), transformY(650.0), transformX(2676), transformY(638));
-    shape.bezierCurveTo(transformX(2685.2), transformY(633.9), transformX(2707.4), transformY(629.2), transformX(2709), transformY(618));
-    
-    // Bottom-Right Lobe
-    shape.bezierCurveTo(transformX(2675.0), transformY(531.7), transformX(2641.6), transformY(451.6), transformX(2595), transformY(379));
-    shape.bezierCurveTo(transformX(2569.0), transformY(338.6), transformX(2536.5), transformY(302.3), transformX(2509), transformY(264));
-    shape.bezierCurveTo(transformX(2473.5), transformY(214.6), transformX(2423.9), transformY(160.8), transformX(2365), transformY(136));
-    shape.bezierCurveTo(transformX(2289.1), transformY(104.0), transformX(2204.8), transformY(116.6), transformX(2133), transformY(144));
-    
-    // Bottom Central Base
-    shape.bezierCurveTo(transformX(2071.0), transformY(169.0), transformX(2037.6), transformY(178.3), transformX(1967), transformY(189));
-    shape.bezierCurveTo(transformX(1912.0), transformY(187.0), transformX(1875.4), transformY(181.4), transformX(1817), transformY(169));
-    
-    // Bottom-Left Lobe
-    shape.bezierCurveTo(transformX(1745.7), transformY(148.0), transformX(1670.2), transformY(95.0), transformX(1571), transformY(117));
-    shape.bezierCurveTo(transformX(1488.8), transformY(135.1), transformX(1417.3), transformY(212.8), transformX(1374), transformY(272));
-    shape.bezierCurveTo(transformX(1346.2), transformY(309.8), transformX(1315.3), transformY(347.0), transformX(1288), transformY(386));
-    shape.bezierCurveTo(transformX(1210.2), transformY(496.6), transformX(1153.8), transformY(651.0), transformX(1122), transformY(807));
-    
-    // Left Side Swell
-    shape.bezierCurveTo(transformX(1110.3), transformY(864.2), transformX(1104.0), transformY(925.3), transformX(1104), transformY(996));
-    shape.bezierCurveTo(transformX(1104.3), transformY(1016.9), transformX(1104.6), transformY(1038.0), transformX(1105), transformY(1059));
-    shape.bezierCurveTo(transformX(1112.6), transformY(1108.9), transformX(1118.1), transformY(1155.9), transformX(1131), transformY(1200));
-    
-    // Top-Left Shoulder & Top Dip
-    shape.bezierCurveTo(transformX(1181.0), transformY(1371.7), transformX(1301.4), transformY(1491.6), transformX(1469), transformY(1547));
-    shape.bezierCurveTo(transformX(1502.3), transformY(1557.9), transformX(1539.5), transformY(1559.2), transformX(1578), transformY(1565));
-    shape.bezierCurveTo(transformX(1620.4), transformY(1571.3), transformX(1660.8), transformY(1556.8), transformX(1692), transformY(1549));
-    shape.bezierCurveTo(transformX(1768.8), transformY(1529.5), transformX(1831.4), transformY(1493.6), transformX(1911), transformY(1480));
-    shape.bezierCurveTo(transformX(1938.5), transformY(1475.2), transformX(1962.9), transformY(1491.4), transformX(1983), transformY(1497));
-    shape.bezierCurveTo(transformX(2044.7), transformY(1514.0), transformX(2099.5), transformY(1538.3), transformX(2162), transformY(1556));
-    shape.bezierCurveTo(transformX(2186.3), transformY(1559.9), transformX(2210.6), transformY(1564.0), transformX(2235), transformY(1568));
-    shape.bezierCurveTo(transformX(2245.3), transformY(1568.6), transformX(2255.6), transformY(1569.3), transformX(2266), transformY(1570));
-    
-    shape.closePath();
-    return shape;
-}
+            // Scale factor and centering offsets derived from the AI vector grid
+            const S = 0.003;
+            const transformX = (x) => (x - 1900) * S;
+            const transformY = (y) => (y - 800) * S;
 
-function createAppleLeafShape() {
-    const shape = new THREE.Shape();
-    
-    const S = 0.003;
-    const transformX = (x) => (x - 1900) * S;
-    const transformY = (y) => (y - 800) * S;
+            // Start at the bottom central dip
+            shape.moveTo(transformX(2266), transformY(1570));
 
-    // Start at leaf base tip
-    shape.moveTo(transformX(2307), transformY(2021));
-    
-    // Leaf profile curves
-    shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
-    shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
-    shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
-    shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
-    shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
-    
-    shape.closePath();
-    return shape;
-}
+            // Top-Right Shoulder
+            shape.bezierCurveTo(transformX(2384.7), transformY(1571.4), transformX(2473.9), transformY(1531.1), transformX(2549), transformY(1488));
+            shape.bezierCurveTo(transformX(2564.5), transformY(1479.0), transformX(2576.6), transformY(1463.1), transformX(2591), transformY(1453));
+            shape.bezierCurveTo(transformX(2612.2), transformY(1438.0), transformX(2629.4), transformY(1416.7), transformX(2645), transformY(1396));
+            shape.bezierCurveTo(transformX(2647.5), transformY(1392.6), transformX(2659.6), transformY(1382.6), transformX(2658), transformY(1377));
+            shape.bezierCurveTo(transformX(2647.6), transformY(1370.6), transformX(2637.3), transformY(1364.3), transformX(2627), transformY(1358));
+            shape.bezierCurveTo(transformX(2601.5), transformY(1342.1), transformX(2572.3), transformY(1317.5), transformX(2553), transformY(1295));
 
-function createAppleLeafShape() {
-    const shape = new THREE.Shape();
-    
-    const S = 0.003;
-    const transformX = (x) => (x - 1900) * S;
-    // Decreased from 800 to 760 to shift the leaf up slightly
-    const transformY = (y) => (y - 760) * S;
+            // The Bite Cutout (Traced directly into the path outline)
+            shape.bezierCurveTo(transformX(2476.5), transformY(1205.8), transformX(2419.2), transformY(1079.8), transformX(2457), transformY(911));
+            shape.bezierCurveTo(transformX(2477.5), transformY(819.0), transformX(2534.1), transformY(741.9), transformX(2597), transformY(691));
+            shape.bezierCurveTo(transformX(2619.9), transformY(672.4), transformX(2648.1), transformY(650.0), transformX(2676), transformY(638));
+            shape.bezierCurveTo(transformX(2685.2), transformY(633.9), transformX(2707.4), transformY(629.2), transformX(2709), transformY(618));
 
-    // Start at leaf base tip [cite: 1]
-    shape.moveTo(transformX(2307), transformY(2021));
-    
-    // Leaf profile curves [cite: 1]
-    shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
-    shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
-    shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
-    shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
-    shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
-    
-    shape.closePath();
-    return shape;
-}
+            // Bottom-Right Lobe
+            shape.bezierCurveTo(transformX(2675.0), transformY(531.7), transformX(2641.6), transformY(451.6), transformX(2595), transformY(379));
+            shape.bezierCurveTo(transformX(2569.0), transformY(338.6), transformX(2536.5), transformY(302.3), transformX(2509), transformY(264));
+            shape.bezierCurveTo(transformX(2473.5), transformY(214.6), transformX(2423.9), transformY(160.8), transformX(2365), transformY(136));
+            shape.bezierCurveTo(transformX(2289.1), transformY(104.0), transformX(2204.8), transformY(116.6), transformX(2133), transformY(144));
+
+            // Bottom Central Base
+            shape.bezierCurveTo(transformX(2071.0), transformY(169.0), transformX(2037.6), transformY(178.3), transformX(1967), transformY(189));
+            shape.bezierCurveTo(transformX(1912.0), transformY(187.0), transformX(1875.4), transformY(181.4), transformX(1817), transformY(169));
+
+            // Bottom-Left Lobe
+            shape.bezierCurveTo(transformX(1745.7), transformY(148.0), transformX(1670.2), transformY(95.0), transformX(1571), transformY(117));
+            shape.bezierCurveTo(transformX(1488.8), transformY(135.1), transformX(1417.3), transformY(212.8), transformX(1374), transformY(272));
+            shape.bezierCurveTo(transformX(1346.2), transformY(309.8), transformX(1315.3), transformY(347.0), transformX(1288), transformY(386));
+            shape.bezierCurveTo(transformX(1210.2), transformY(496.6), transformX(1153.8), transformY(651.0), transformX(1122), transformY(807));
+
+            // Left Side Swell
+            shape.bezierCurveTo(transformX(1110.3), transformY(864.2), transformX(1104.0), transformY(925.3), transformX(1104), transformY(996));
+            shape.bezierCurveTo(transformX(1104.3), transformY(1016.9), transformX(1104.6), transformY(1038.0), transformX(1105), transformY(1059));
+            shape.bezierCurveTo(transformX(1112.6), transformY(1108.9), transformX(1118.1), transformY(1155.9), transformX(1131), transformY(1200));
+
+            // Top-Left Shoulder & Top Dip
+            shape.bezierCurveTo(transformX(1181.0), transformY(1371.7), transformX(1301.4), transformY(1491.6), transformX(1469), transformY(1547));
+            shape.bezierCurveTo(transformX(1502.3), transformY(1557.9), transformX(1539.5), transformY(1559.2), transformX(1578), transformY(1565));
+            shape.bezierCurveTo(transformX(1620.4), transformY(1571.3), transformX(1660.8), transformY(1556.8), transformX(1692), transformY(1549));
+            shape.bezierCurveTo(transformX(1768.8), transformY(1529.5), transformX(1831.4), transformY(1493.6), transformX(1911), transformY(1480));
+            shape.bezierCurveTo(transformX(1938.5), transformY(1475.2), transformX(1962.9), transformY(1491.4), transformX(1983), transformY(1497));
+            shape.bezierCurveTo(transformX(2044.7), transformY(1514.0), transformX(2099.5), transformY(1538.3), transformX(2162), transformY(1556));
+            shape.bezierCurveTo(transformX(2186.3), transformY(1559.9), transformX(2210.6), transformY(1564.0), transformX(2235), transformY(1568));
+            shape.bezierCurveTo(transformX(2245.3), transformY(1568.6), transformX(2255.6), transformY(1569.3), transformX(2266), transformY(1570));
+
+            shape.closePath();
+            return shape;
+        }
+
+        function createAppleLeafShape() {
+            const shape = new THREE.Shape();
+
+            const S = 0.003;
+            const transformX = (x) => (x - 1900) * S;
+            const transformY = (y) => (y - 800) * S;
+
+            // Start at leaf base tip
+            shape.moveTo(transformX(2307), transformY(2021));
+
+            // Leaf profile curves
+            shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
+            shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
+            shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
+            shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
+            shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
+
+            shape.closePath();
+            return shape;
+        }
+
+        function createAppleLeafShape() {
+            const shape = new THREE.Shape();
+
+            const S = 0.003;
+            const transformX = (x) => (x - 1900) * S;
+            // Decreased from 800 to 760 to shift the leaf up slightly
+            const transformY = (y) => (y - 760) * S;
+
+            // Start at leaf base tip [cite: 1]
+            shape.moveTo(transformX(2307), transformY(2021));
+
+            // Leaf profile curves [cite: 1]
+            shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
+            shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
+            shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
+            shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
+            shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
+
+            shape.closePath();
+            return shape;
+        }
 
 
-        const logoScale = 0.35; 
+        const logoScale = 0.35;
         const logoGroup = new THREE.Group();
         const logoMat = new THREE.MeshStandardMaterial({ color: 0x615444, roughness: 0.15, metalness: 0.85 });
 
         const logoBodyGeo = new THREE.ExtrudeGeometry(createAppleLogoShape(), { depth: 0.02, bevelEnabled: false });
         const logoLeafGeo = new THREE.ExtrudeGeometry(createAppleLeafShape(), { depth: 0.02, bevelEnabled: false });
-        
+
         const logoBodyMesh = new THREE.Mesh(logoBodyGeo, logoMat);
         const logoLeafMesh = new THREE.Mesh(logoLeafGeo, logoMat);
 
@@ -507,28 +615,30 @@ function createAppleLeafShape() {
         logoGroup.add(logoLeafMesh);
         logoGroup.rotation.y = Math.PI;
         logoGroup.scale.set(logoScale, logoScale, 1);
-        logoGroup.position.set(0, -0.5, -(d / 2) - 0.08); 
+        logoGroup.position.set(0, -0.5, -(d / 2) - 0.08);
         phoneGroup.add(logoGroup);
 
 
         // --- 7. CAMERA ARRAY PLATFORM & SENSOR REALIGNMENT ---
         const camBumpW = 2.95, camBumpH = 2.95, camBumpR = 0.6;
         const camBumpShape = new THREE.Shape();
-        camBumpShape.moveTo(-camBumpW/2 + camBumpR, -camBumpH/2);
-        camBumpShape.lineTo(camBumpW/2 - camBumpR, -camBumpH/2);
-        camBumpShape.quadraticCurveTo(camBumpW/2, -camBumpH/2, camBumpW/2, -camBumpH/2 + camBumpR);
-        camBumpShape.lineTo(camBumpW/2, camBumpH/2 - camBumpR);
-        camBumpShape.quadraticCurveTo(camBumpW/2, camBumpH/2, camBumpW/2 - camBumpR, camBumpH/2);
-        camBumpShape.lineTo(-camBumpW/2 + camBumpR, camBumpH/2);
-        camBumpShape.quadraticCurveTo(-camBumpW/2, camBumpH/2, -camBumpW/2, camBumpH/2 - camBumpR);
-        camBumpShape.lineTo(-camBumpW/2, -camBumpH/2 + camBumpR);
-        camBumpShape.quadraticCurveTo(-camBumpW/2, -camBumpH/2, -camBumpW/2 + camBumpR, -camBumpH/2);
+        camBumpShape.moveTo(-camBumpW / 2 + camBumpR, -camBumpH / 2);
+        camBumpShape.lineTo(camBumpW / 2 - camBumpR, -camBumpH / 2);
+        camBumpShape.quadraticCurveTo(camBumpW / 2, -camBumpH / 2, camBumpW / 2, -camBumpH / 2 + camBumpR);
+        camBumpShape.lineTo(camBumpW / 2, camBumpH / 2 - camBumpR);
+        camBumpShape.quadraticCurveTo(camBumpW / 2, camBumpH / 2, camBumpW / 2 - camBumpR, camBumpH / 2);
+        camBumpShape.lineTo(-camBumpW / 2 + camBumpR, camBumpH / 2);
+        camBumpShape.quadraticCurveTo(-camBumpW / 2, camBumpH / 2, -camBumpW / 2, camBumpH / 2 - camBumpR);
+        camBumpShape.lineTo(-camBumpW / 2, -camBumpH / 2 + camBumpR);
+        camBumpShape.quadraticCurveTo(-camBumpW / 2, -camBumpH / 2, -camBumpW / 2 + camBumpR, -camBumpH / 2);
 
         const camBumpGeo = new THREE.ExtrudeGeometry(camBumpShape, { depth: 0.14, bevelEnabled: true, bevelSegments: 5, bevelSize: 0.02, bevelThickness: 0.02 });
         camBumpGeo.center();
-        const camBumpMat = new THREE.MeshStandardMaterial({ color: 0xc8baa8, roughness: 0.3, metalness: 0.5 });
+        const camBumpMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, roughness: 0.15, metalness: 0.9, clearcoat: 0.8, clearcoatRoughness: 0.2 });
         const camBumpMesh = new THREE.Mesh(camBumpGeo, camBumpMat);
-        
+        camBumpMesh.castShadow = true;
+        camBumpMesh.receiveShadow = true;
+
         // FIXED: Shifted from -1.48 to +1.48 to place the entire module on the TOP RIGHT
         const bumpCenterX = 1.48;
         const bumpCenterY = 5.10;
@@ -536,18 +646,19 @@ function createAppleLeafShape() {
         phoneGroup.add(camBumpMesh);
 
         // Core Optics Module Engine
-        const lensBaseMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.35, metalness: 0.8 });
-        const lensChromeMat = new THREE.MeshStandardMaterial({ color: 0xd6cbbd, metalness: 0.9, roughness: 0.15 });
-        const deepGlassMat = new THREE.MeshStandardMaterial({ color: 0x040608, roughness: 0.01, metalness: 0.95 });
-        
+        const lensBaseMat = new THREE.MeshPhysicalMaterial({ color: 0x090a0d, roughness: 0.35, metalness: 0.8 });
+        const lensChromeMat = new THREE.MeshPhysicalMaterial({ color: 0xd6cbbd, metalness: 1.0, roughness: 0.05 });
+        const deepGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x040608, roughness: 0.0, metalness: 0.1, transmission: 0.9, thickness: 0.5 });
+
         function drawLensAssemblyNode(offsetX, offsetY) {
             const assembly = new THREE.Group();
-            
+
             // Outer Ring Chamfer Base
             const bezelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.16, 36);
             bezelGeo.rotateX(Math.PI / 2);
             const bezelMesh = new THREE.Mesh(bezelGeo, lensChromeMat);
             bezelMesh.position.z = -0.08;
+            bezelMesh.castShadow = true; bezelMesh.receiveShadow = true;
             assembly.add(bezelMesh);
 
             // Dark Internal Stepped Well
@@ -555,6 +666,7 @@ function createAppleLeafShape() {
             innerGeo.rotateX(Math.PI / 2);
             const innerMesh = new THREE.Mesh(innerGeo, lensBaseMat);
             innerMesh.position.z = -0.09;
+            innerMesh.castShadow = true; innerMesh.receiveShadow = true;
             assembly.add(innerMesh);
 
             // High-index Layer Glass Lens element
@@ -562,6 +674,7 @@ function createAppleLeafShape() {
             glassGeo.rotateX(Math.PI / 2);
             const glassMesh = new THREE.Mesh(glassGeo, deepGlassMat);
             glassMesh.position.z = -0.15;
+            glassMesh.castShadow = true; glassMesh.receiveShadow = true;
             assembly.add(glassMesh);
 
             // Deep Core Aperture Pupil
@@ -653,7 +766,7 @@ function createAppleLeafShape() {
         function initializePresetsMatrix() {
             const rawStored = localStorage.getItem('iphone_studio_presets_2026');
             if (rawStored) {
-                try { studioPresetsRegistry = JSON.parse(rawStored); } catch(e) { generateFallbackPresets(); }
+                try { studioPresetsRegistry = JSON.parse(rawStored); } catch (e) { generateFallbackPresets(); }
             } else {
                 generateFallbackPresets();
             }
@@ -691,7 +804,7 @@ function createAppleLeafShape() {
                 nameInput.value = preset.name;
                 nameInput.addEventListener('change', (e) => {
                     preset.name = e.target.value;
-                    if(preset.isUnset) delete preset.isUnset;
+                    if (preset.isUnset) delete preset.isUnset;
                     savePresetsToLocalStorage();
                 });
 
@@ -725,13 +838,13 @@ function createAppleLeafShape() {
             preset.y = parseInt(sliderRotY.value);
             preset.z = parseInt(sliderRotZ.value);
             preset.scale = parseInt(sliderScale.value);
-            
-            if(preset.isUnset || preset.name.startsWith("Custom Slot")) {
+
+            if (preset.isUnset || preset.name.startsWith("Custom Slot")) {
                 preset.name = `Saved Position (${preset.x}°, ${preset.y}°)`;
                 connectedInputElement.value = preset.name;
                 delete preset.isUnset;
             }
-            
+
             savePresetsToLocalStorage();
             connectedInputElement.style.color = '#30d158';
             setTimeout(() => connectedInputElement.style.color = '#ffffff', 400);
@@ -759,9 +872,9 @@ function createAppleLeafShape() {
         function processImageFile(file) {
             if (!file.type.startsWith('image/')) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = function (evt) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     const nextTexture = new THREE.Texture(img);
                     nextTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
                     nextTexture.minFilter = THREE.LinearFilter;
@@ -781,7 +894,7 @@ function createAppleLeafShape() {
             renderer.render(scene, camera);
             const rawUrl = renderer.domElement.toDataURL('image/png');
             const anchor = document.createElement('a');
-            anchor.download = `sightline_canvas_${new Date().toISOString().slice(0,10)}.png`;
+            anchor.download = `sightline_canvas_${new Date().toISOString().slice(0, 10)}.png`;
             anchor.href = rawUrl;
             anchor.click();
         });
@@ -808,9 +921,9 @@ function createAppleLeafShape() {
                 let rawY = Math.round(-THREE.MathUtils.radToDeg(spherical.theta));
                 let calculatedScale = Math.round((defaultCamDistance / spherical.radius) * 100);
 
-                if(rawX > 85) rawX = 85; if(rawX < -85) rawX = -85;
-                if(rawY > 180) rawY = 180; if(rawY < -180) rawY = -180;
-                if(calculatedScale > 170) calculatedScale = 170; if(calculatedScale < 30) calculatedScale = 30;
+                if (rawX > 85) rawX = 85; if (rawX < -85) rawX = -85;
+                if (rawY > 180) rawY = 180; if (rawY < -180) rawY = -180;
+                if (calculatedScale > 170) calculatedScale = 170; if (calculatedScale < 30) calculatedScale = 30;
 
                 sliderRotX.value = rawX;
                 sliderRotY.value = rawY;
@@ -828,4 +941,5 @@ function createAppleLeafShape() {
         tick();
     </script>
 </body>
+
 </html>

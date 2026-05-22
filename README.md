@@ -8,7 +8,9 @@ A high-performance, interactive 3D web application designed to help developers a
 - **Precision Camera Control:** Use intuitive sliders to rotate the device across X, Y, and Z axes and adjust the studio zoom scale, offering limitless framing possibilities.
 - **Dynamic Studio Presets:** Store, rename, and quickly swap between up to 8 custom camera angles, saving time when generating consistent asset packs.
 - **Transparent PNG Export:** Capture crisp, transparent `.png` renders with a single click, ready to be dropped into your App Store layouts or marketing websites.
-- **Photorealistic Lighting:** Pre-configured lighting, shading, and HDR tone mapping ensure your renders look incredibly premium, mimicking real-world studio lighting.
+- **Advanced Physical Materials:** Utilizes `MeshPhysicalMaterial` for highly accurate clearcoat glass surfaces, perfectly matching the titanium/aluminum edges, back glass plates, and frosted camera bumps.
+- **Detailed Hardware Elements:** Features deep optical lens simulations using light transmission, precise bezel rounding, dynamic islands, and bottom-edge speaker/microphone grilles.
+- **Photorealistic Lighting:** Pre-configured high-resolution soft shadow maps (PCFSoftShadowMap), directional studio lighting, and HDR tone mapping ensure your renders look incredibly premium without blowing out true colors.
 - **No Installation Required:** Runs entirely in any modern web browser—no complex 3D software or heavy installation needed.
 
 ## 🚀 How to Use

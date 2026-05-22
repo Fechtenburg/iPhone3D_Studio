@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium 3D iPhone App Store Studio</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121212;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #ffffff;
+            user-select: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        #ui-layer::-webkit-scrollbar { width: 4px; }
+        #ui-layer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+        #ui-layer2 {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        #ui-layer2::-webkit-scrollbar { width: 4px; }
+        #ui-layer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        
+        .panel {
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            width: 310px;
+            pointer-events: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        h1 { font-size: 15px; margin: 0 0 4px 0; font-weight: 600; letter-spacing: -0.5px;}
+        p { font-size: 12px; color: #8e8e93; margin: 0 0 15px 0; line-height: 1.4; }
+        .control-group { margin-bottom: 18px; }
+        
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: #aeaea2;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        label span { color: #0071e3; text-transform: none; font-family: monospace; }
+        
+        .slider-input {
+            width: 100%;
+            background: #3a3a3c;
+            -webkit-appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            margin: 10px 0;
+        }
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #0071e3;
+            cursor: pointer;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            background: #0071e3;
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .btn:hover { background: #0077ed; }
+        #file-input { display: none; }
+        
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #d1d1d6;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+        }
+        
+        .preset-manager-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .preset-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .preset-name-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            padding: 4px;
+            outline: none;
+            border-bottom: 1px solid transparent;
+            width: 110px;
+        }
+        .preset-name-input:focus { border-bottom-color: #0071e3; }
+        .btn-action {
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-load { background: rgba(255,255,255,0.1); color: #fff; flex-shrink: 0; }
+        .btn-load:hover { background: rgba(255,255,255,0.2); }
+        .btn-save { background: rgba(0, 113, 227, 0.2); color: #0a84ff; }
+        .btn-save:hover { background: rgba(0, 113, 227, 0.3); }
+
+        .footer-note {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #8e8e93;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer2">
+        <div class="panel">
+            <h1>Dynamic Studio Presets</h1>
+            <p>Store, rename, and update up to 8 persistent camera positions.</p>
+            <div class="preset-manager-grid" id="presets-container"></div>
+        </div>
+    </div>
+
+
+    <div id="ui-layer">
+        <div class="panel">
+            <h1>Studio Canvas Engine</h1>
+            <p>Precise asset control and image generation.</p>
+            
+            <div class="control-group">
+                <label>1. Texture Source</label>
+                <div class="drop-zone" id="drop-zone">Drop Screenshot Here</div>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+
+            <div class="control-group" style="margin-bottom: 0;">
+                <label>2. Output Generation</label>
+                <button class="btn" id="export-btn">Capture Transparent PNG</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h1>Canvas Transformation</h1>
+            <p>Drag canvas background directly to flip around and preview camera array.</p>
+
+            <div class="control-group">
+                <label>Rotation X (Pitch) <span id="val-rotX">0°</span></label>
+                <input type="range" id="slider-rotX" class="slider-input" min="-85" max="85" value="0">
+            </div>
+
+            <div class="control-group">
+                <label>Rotation Y (Yaw) <span id="val-rotY">0°</span></label>
+                <input type="range" id="slider-rotY" class="slider-input" min="-180" max="180" value="0">
+            </div>
+
+            <div class="control-group">
+                <label>Rotation Z (Roll) <span id="val-rotZ">0°</span></label>
+                <input type="range" id="slider-rotZ" class="slider-input" min="-180" max="180" value="0">
+            </div>
+
+            <div class="control-group" style="margin-bottom:0;">
+                <label>Studio Zoom Scale <span id="val-scale">100%</span></label>
+                <input type="range" id="slider-scale" class="slider-input" min="30" max="170" value="100">
+            </div>
+        </div>
+
+        
+    </div>
+
+    <div class="footer-note">Rotate 180° with Mouse to see corrected Titanium Gold Back & Cameras</div>
+
+    <script>
+        // --- 1. CORE ENGINE INITIALIZATION ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const defaultCamDistance = 50;
+        camera.position.set(0, 0, defaultCamDistance);
+
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true, 
+            preserveDrawingBuffer: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.max(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.25; 
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(renderer.domElement);
+
+        // --- 2. CONTROLS ---
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.15;
+        controls.enableZoom = true;   
+        controls.enablePan = false;
+        controls.minPolarAngle = THREE.MathUtils.degToRad(5);
+        controls.maxPolarAngle = THREE.MathUtils.degToRad(175);
+
+        // --- 3. LIGHTING DESIGN ---
+        const globalAmbient = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(globalAmbient);
+
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        frontLight.position.set(-5, 5, 12);
+        scene.add(frontLight);
+
+        const backKeyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        backKeyLight.position.set(5, 8, -12);
+        scene.add(backKeyLight);
+
+        const backFillLight = new THREE.DirectionalLight(0xeea38, 0.7); 
+        backFillLight.position.set(-6, -4, -10);
+        scene.add(backFillLight);
+
+        // --- 4. PROCEDURAL CANVAS GENERATORS ---
+        function createDefaultScreenTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1179; canvas.height = 2556;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0b0b0e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#bfa17f'; ctx.font = 'bold 70px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center'; ctx.fillText("DROP SCREENSHOT HERE", canvas.width / 2, canvas.height / 2);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.encoding = THREE.sRGBEncoding;
+            return tex;
+        }
+
+        let screenTexture = createDefaultScreenTexture();
+
+        // --- 5. CHASSIS DEVICE GEOMETRY ---
+        const phoneGroup = new THREE.Group();
+        scene.add(phoneGroup);
+
+        const w = 7.15, h = 14.66, d = 0.74, r = 0.95;
+
+        function createRoundedRectShape(width, height, radius) {
+            const shape = new THREE.Shape();
+            shape.moveTo(-width/2 + radius, -height/2); shape.lineTo(width/2 - radius, -height/2);
+            shape.quadraticCurveTo(width/2, -height/2, width/2, -height/2 + radius); shape.lineTo(width/2, height/2 - radius);
+            shape.quadraticCurveTo(width/2, height/2, width/2 - radius, height/2); shape.lineTo(-width/2 + radius, height/2);
+            shape.quadraticCurveTo(-width/2, height/2, -width/2, height/2 - radius); shape.lineTo(-width/2, -height/2 + radius);
+            shape.quadraticCurveTo(-width/2, -height/2, -width/2 + radius, -height/2);
+            return shape;
+        }
+
+        const chassisShape = createRoundedRectShape(w, h, r);
+        const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, { 
+            depth: d, bevelEnabled: true, bevelSegments: 8, steps: 1, bevelSize: 0.04, bevelThickness: 0.04 
+        });
+        chassisGeo.center();
+        
+        const chassisMat = new THREE.MeshStandardMaterial({ color: 0xbfae99, metalness: 0.8, roughness: 0.25 });
+        const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+        phoneGroup.add(chassis);
+
+        // USB-C Port
+        const darkPortMat = new THREE.MeshBasicMaterial({ color: 0x1d1814 });
+        const usbcMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.2), darkPortMat);
+        usbcMesh.position.set(0, -(h/2) - 0.02, 0);
+        phoneGroup.add(usbcMesh);
+
+        // Front Screen Panel Layout
+        const bezelPadding = 0.24;
+        const screenW = w - bezelPadding; const screenH = h - bezelPadding;
+        const screenR = r - (bezelPadding / 2);
+        const targetScreenShape = createRoundedRectShape(screenW, screenH, screenR);
+        
+        const screenGeo = new THREE.ShapeGeometry(targetScreenShape);
+        const posAttribute = screenGeo.attributes.position;
+        const uvs = [];
+        for (let i = 0; i < posAttribute.count; i++) {
+            uvs.push((posAttribute.getX(i) / screenW) + 0.5, (posAttribute.getY(i) / screenH) + 0.5);
+        }
+        screenGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+        const screenMat = new THREE.MeshStandardMaterial({ map: screenTexture, roughness: 0.18, metalness: 0.0, side: THREE.DoubleSide });
+        const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+        screenMesh.position.z = (d / 2) + 0.05; 
+        phoneGroup.add(screenMesh);
+
+        // Dynamic Island
+        const islandShapeObj = new THREE.Shape();
+        const iW = 1.68, iH = 0.42, iR = 0.21;
+        islandShapeObj.moveTo(-iW/2 + iR, -iH/2); islandShapeObj.lineTo(iW/2 - iR, -iH/2);
+        islandShapeObj.quadraticCurveTo(iW/2, -iH/2, iW/2, -iH/2 + iR); islandShapeObj.lineTo(iW/2, iH/2 - iR);
+        islandShapeObj.quadraticCurveTo(iW/2, iH/2, iW/2 - iR, iH/2); islandShapeObj.lineTo(-iW/2 + iR, iH/2);
+        islandShapeObj.quadraticCurveTo(-iW/2, iH/2, -iW/2, iH/2 - iR); islandShapeObj.lineTo(-iW/2, -iH/2 + iR);
+        islandShapeObj.quadraticCurveTo(-iW/2, -iH/2, -iW/2 + iR, -iH/2);
+
+        const islandMesh = new THREE.Mesh(new THREE.ShapeGeometry(islandShapeObj), new THREE.MeshBasicMaterial({ color: 0x070709, side: THREE.DoubleSide }));
+        islandMesh.position.set(0, h/2 - 1.02, (d / 2) + 0.055);
+        phoneGroup.add(islandMesh);
+
+
+        // --- 6. ISOLATED BACK PLATE & LOGO GEOMETRY ---
+        const backPanelGeo = new THREE.ShapeGeometry(targetScreenShape);
+        const backPanelMat = new THREE.MeshStandardMaterial({
+            color: 0xc4b29c,
+            roughness: 0.5,
+            metalness: 0.35,
+            side: THREE.DoubleSide
+        });
+        const backPanelMesh = new THREE.Mesh(backPanelGeo, backPanelMat);
+        backPanelMesh.rotation.y = Math.PI;
+        backPanelMesh.position.set(0, 0, -(d / 2) - 0.05);
+        phoneGroup.add(backPanelMesh);
+
+   function createAppleLogoShape() {
+    const shape = new THREE.Shape();
+    
+    // Scale factor and centering offsets derived from the AI vector grid
+    const S = 0.003;
+    const transformX = (x) => (x - 1900) * S;
+    const transformY = (y) => (y - 800) * S;
+
+    // Start at the bottom central dip
+    shape.moveTo(transformX(2266), transformY(1570));
+    
+    // Top-Right Shoulder
+    shape.bezierCurveTo(transformX(2384.7), transformY(1571.4), transformX(2473.9), transformY(1531.1), transformX(2549), transformY(1488));
+    shape.bezierCurveTo(transformX(2564.5), transformY(1479.0), transformX(2576.6), transformY(1463.1), transformX(2591), transformY(1453));
+    shape.bezierCurveTo(transformX(2612.2), transformY(1438.0), transformX(2629.4), transformY(1416.7), transformX(2645), transformY(1396));
+    shape.bezierCurveTo(transformX(2647.5), transformY(1392.6), transformX(2659.6), transformY(1382.6), transformX(2658), transformY(1377));
+    shape.bezierCurveTo(transformX(2647.6), transformY(1370.6), transformX(2637.3), transformY(1364.3), transformX(2627), transformY(1358));
+    shape.bezierCurveTo(transformX(2601.5), transformY(1342.1), transformX(2572.3), transformY(1317.5), transformX(2553), transformY(1295));
+    
+    // The Bite Cutout (Traced directly into the path outline)
+    shape.bezierCurveTo(transformX(2476.5), transformY(1205.8), transformX(2419.2), transformY(1079.8), transformX(2457), transformY(911));
+    shape.bezierCurveTo(transformX(2477.5), transformY(819.0), transformX(2534.1), transformY(741.9), transformX(2597), transformY(691));
+    shape.bezierCurveTo(transformX(2619.9), transformY(672.4), transformX(2648.1), transformY(650.0), transformX(2676), transformY(638));
+    shape.bezierCurveTo(transformX(2685.2), transformY(633.9), transformX(2707.4), transformY(629.2), transformX(2709), transformY(618));
+    
+    // Bottom-Right Lobe
+    shape.bezierCurveTo(transformX(2675.0), transformY(531.7), transformX(2641.6), transformY(451.6), transformX(2595), transformY(379));
+    shape.bezierCurveTo(transformX(2569.0), transformY(338.6), transformX(2536.5), transformY(302.3), transformX(2509), transformY(264));
+    shape.bezierCurveTo(transformX(2473.5), transformY(214.6), transformX(2423.9), transformY(160.8), transformX(2365), transformY(136));
+    shape.bezierCurveTo(transformX(2289.1), transformY(104.0), transformX(2204.8), transformY(116.6), transformX(2133), transformY(144));
+    
+    // Bottom Central Base
+    shape.bezierCurveTo(transformX(2071.0), transformY(169.0), transformX(2037.6), transformY(178.3), transformX(1967), transformY(189));
+    shape.bezierCurveTo(transformX(1912.0), transformY(187.0), transformX(1875.4), transformY(181.4), transformX(1817), transformY(169));
+    
+    // Bottom-Left Lobe
+    shape.bezierCurveTo(transformX(1745.7), transformY(148.0), transformX(1670.2), transformY(95.0), transformX(1571), transformY(117));
+    shape.bezierCurveTo(transformX(1488.8), transformY(135.1), transformX(1417.3), transformY(212.8), transformX(1374), transformY(272));
+    shape.bezierCurveTo(transformX(1346.2), transformY(309.8), transformX(1315.3), transformY(347.0), transformX(1288), transformY(386));
+    shape.bezierCurveTo(transformX(1210.2), transformY(496.6), transformX(1153.8), transformY(651.0), transformX(1122), transformY(807));
+    
+    // Left Side Swell
+    shape.bezierCurveTo(transformX(1110.3), transformY(864.2), transformX(1104.0), transformY(925.3), transformX(1104), transformY(996));
+    shape.bezierCurveTo(transformX(1104.3), transformY(1016.9), transformX(1104.6), transformY(1038.0), transformX(1105), transformY(1059));
+    shape.bezierCurveTo(transformX(1112.6), transformY(1108.9), transformX(1118.1), transformY(1155.9), transformX(1131), transformY(1200));
+    
+    // Top-Left Shoulder & Top Dip
+    shape.bezierCurveTo(transformX(1181.0), transformY(1371.7), transformX(1301.4), transformY(1491.6), transformX(1469), transformY(1547));
+    shape.bezierCurveTo(transformX(1502.3), transformY(1557.9), transformX(1539.5), transformY(1559.2), transformX(1578), transformY(1565));
+    shape.bezierCurveTo(transformX(1620.4), transformY(1571.3), transformX(1660.8), transformY(1556.8), transformX(1692), transformY(1549));
+    shape.bezierCurveTo(transformX(1768.8), transformY(1529.5), transformX(1831.4), transformY(1493.6), transformX(1911), transformY(1480));
+    shape.bezierCurveTo(transformX(1938.5), transformY(1475.2), transformX(1962.9), transformY(1491.4), transformX(1983), transformY(1497));
+    shape.bezierCurveTo(transformX(2044.7), transformY(1514.0), transformX(2099.5), transformY(1538.3), transformX(2162), transformY(1556));
+    shape.bezierCurveTo(transformX(2186.3), transformY(1559.9), transformX(2210.6), transformY(1564.0), transformX(2235), transformY(1568));
+    shape.bezierCurveTo(transformX(2245.3), transformY(1568.6), transformX(2255.6), transformY(1569.3), transformX(2266), transformY(1570));
+    
+    shape.closePath();
+    return shape;
+}
+
+function createAppleLeafShape() {
+    const shape = new THREE.Shape();
+    
+    const S = 0.003;
+    const transformX = (x) => (x - 1900) * S;
+    const transformY = (y) => (y - 800) * S;
+
+    // Start at leaf base tip
+    shape.moveTo(transformX(2307), transformY(2021));
+    
+    // Leaf profile curves
+    shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
+    shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
+    shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
+    shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
+    shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
+    
+    shape.closePath();
+    return shape;
+}
+
+function createAppleLeafShape() {
+    const shape = new THREE.Shape();
+    
+    const S = 0.003;
+    const transformX = (x) => (x - 1900) * S;
+    // Decreased from 800 to 760 to shift the leaf up slightly
+    const transformY = (y) => (y - 760) * S;
+
+    // Start at leaf base tip [cite: 1]
+    shape.moveTo(transformX(2307), transformY(2021));
+    
+    // Leaf profile curves [cite: 1]
+    shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
+    shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
+    shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
+    shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
+    shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
+    
+    shape.closePath();
+    return shape;
+}
+
+
+        const logoScale = 0.35; 
+        const logoGroup = new THREE.Group();
+        const logoMat = new THREE.MeshStandardMaterial({ color: 0x615444, roughness: 0.15, metalness: 0.85 });
+
+        const logoBodyGeo = new THREE.ExtrudeGeometry(createAppleLogoShape(), { depth: 0.02, bevelEnabled: false });
+        const logoLeafGeo = new THREE.ExtrudeGeometry(createAppleLeafShape(), { depth: 0.02, bevelEnabled: false });
+        
+        const logoBodyMesh = new THREE.Mesh(logoBodyGeo, logoMat);
+        const logoLeafMesh = new THREE.Mesh(logoLeafGeo, logoMat);
+
+        logoBodyMesh.position.z = -0.01;
+        logoLeafMesh.position.z = -0.01;
+
+        logoGroup.add(logoBodyMesh);
+        logoGroup.add(logoLeafMesh);
+        logoGroup.rotation.y = Math.PI;
+        logoGroup.scale.set(logoScale, logoScale, 1);
+        logoGroup.position.set(0, -0.5, -(d / 2) - 0.08); 
+        phoneGroup.add(logoGroup);
+
+
+        // --- 7. CAMERA ARRAY PLATFORM & SENSOR REALIGNMENT ---
+        const camBumpW = 2.95, camBumpH = 2.95, camBumpR = 0.6;
+        const camBumpShape = new THREE.Shape();
+        camBumpShape.moveTo(-camBumpW/2 + camBumpR, -camBumpH/2);
+        camBumpShape.lineTo(camBumpW/2 - camBumpR, -camBumpH/2);
+        camBumpShape.quadraticCurveTo(camBumpW/2, -camBumpH/2, camBumpW/2, -camBumpH/2 + camBumpR);
+        camBumpShape.lineTo(camBumpW/2, camBumpH/2 - camBumpR);
+        camBumpShape.quadraticCurveTo(camBumpW/2, camBumpH/2, camBumpW/2 - camBumpR, camBumpH/2);
+        camBumpShape.lineTo(-camBumpW/2 + camBumpR, camBumpH/2);
+        camBumpShape.quadraticCurveTo(-camBumpW/2, camBumpH/2, -camBumpW/2, camBumpH/2 - camBumpR);
+        camBumpShape.lineTo(-camBumpW/2, -camBumpH/2 + camBumpR);
+        camBumpShape.quadraticCurveTo(-camBumpW/2, -camBumpH/2, -camBumpW/2 + camBumpR, -camBumpH/2);
+
+        const camBumpGeo = new THREE.ExtrudeGeometry(camBumpShape, { depth: 0.14, bevelEnabled: true, bevelSegments: 5, bevelSize: 0.02, bevelThickness: 0.02 });
+        camBumpGeo.center();
+        const camBumpMat = new THREE.MeshStandardMaterial({ color: 0xc8baa8, roughness: 0.3, metalness: 0.5 });
+        const camBumpMesh = new THREE.Mesh(camBumpGeo, camBumpMat);
+        
+        // FIXED: Shifted from -1.48 to +1.48 to place the entire module on the TOP RIGHT
+        const bumpCenterX = 1.48;
+        const bumpCenterY = 5.10;
+        camBumpMesh.position.set(bumpCenterX, bumpCenterY, -(d / 2) - 0.07);
+        phoneGroup.add(camBumpMesh);
+
+        // Core Optics Module Engine
+        const lensBaseMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.35, metalness: 0.8 });
+        const lensChromeMat = new THREE.MeshStandardMaterial({ color: 0xd6cbbd, metalness: 0.9, roughness: 0.15 });
+        const deepGlassMat = new THREE.MeshStandardMaterial({ color: 0x040608, roughness: 0.01, metalness: 0.95 });
+        
+        function drawLensAssemblyNode(offsetX, offsetY) {
+            const assembly = new THREE.Group();
+            
+            // Outer Ring Chamfer Base
+            const bezelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.16, 36);
+            bezelGeo.rotateX(Math.PI / 2);
+            const bezelMesh = new THREE.Mesh(bezelGeo, lensChromeMat);
+            bezelMesh.position.z = -0.08;
+            assembly.add(bezelMesh);
+
+            // Dark Internal Stepped Well
+            const innerGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.14, 32);
+            innerGeo.rotateX(Math.PI / 2);
+            const innerMesh = new THREE.Mesh(innerGeo, lensBaseMat);
+            innerMesh.position.z = -0.09;
+            assembly.add(innerMesh);
+
+            // High-index Layer Glass Lens element
+            const glassGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.03, 24);
+            glassGeo.rotateX(Math.PI / 2);
+            const glassMesh = new THREE.Mesh(glassGeo, deepGlassMat);
+            glassMesh.position.z = -0.15;
+            assembly.add(glassMesh);
+
+            // Deep Core Aperture Pupil
+            const pupilGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.01, 16);
+            pupilGeo.rotateX(Math.PI / 2);
+            const pupilMesh = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x0b0d10 }));
+            pupilMesh.position.z = -0.16;
+            assembly.add(pupilMesh);
+
+            assembly.position.set(bumpCenterX + offsetX, bumpCenterY + offsetY, -(d / 2) - 0.07);
+            phoneGroup.add(assembly);
+        }
+
+        // FIXED: Mirrored X offsets so dual lenses are on the RIGHT and single is on the LEFT
+        drawLensAssemblyNode(0.64, 0.64);     // Telephoto Lens (Top Right)
+        drawLensAssemblyNode(0.64, -0.64);    // Main Wide Lens (Bottom Right)
+        drawLensAssemblyNode(-0.58, 0.0);     // Ultra Wide Lens (Middle Left)
+
+        // FIXED: Mirrored Flash Node Position to (Top Left)
+        const flashGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.02, 24);
+        flashGeo.rotateX(Math.PI / 2);
+        const flashMat = new THREE.MeshStandardMaterial({ color: 0xfdfbf7, roughness: 0.4, metalness: 0.1, emissive: 0x1c1c0a });
+        const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+        flashMesh.position.set(bumpCenterX - 0.54, bumpCenterY + 0.96, -(d / 2) - 0.15);
+        phoneGroup.add(flashMesh);
+
+        // FIXED: Mirrored LiDAR Sensor Node Location to (Bottom Left)
+        const lidarGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.02, 24);
+        lidarGeo.rotateX(Math.PI / 2);
+        const lidarMat = new THREE.MeshStandardMaterial({ color: 0x18191d, roughness: 0.45, metalness: 0.6 });
+        const lidarMesh = new THREE.Mesh(lidarGeo, lidarMat);
+        lidarMesh.position.set(bumpCenterX - 0.54, bumpCenterY - 0.88, -(d / 2) - 0.15);
+        phoneGroup.add(lidarMesh);
+
+        // FIXED: Mirrored Ambient System Audio Mic Pin-Hole to sit symmetrically between Left & Bottom lenses
+        const micGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.01, 12);
+        micGeo.rotateX(Math.PI / 2);
+        const micMesh = new THREE.Mesh(micGeo, new THREE.MeshBasicMaterial({ color: 0x1b1b1b }));
+        micMesh.position.set(bumpCenterX - 0.10, bumpCenterY - 0.56, -(d / 2) - 0.15);
+        phoneGroup.add(micMesh);
+
+        // --- 8. HUD INTERACTION LINK ---
+        const sliderRotX = document.getElementById('slider-rotX');
+        const sliderRotY = document.getElementById('slider-rotY');
+        const sliderRotZ = document.getElementById('slider-rotZ');
+        const sliderScale = document.getElementById('slider-scale');
+
+        const valRotX = document.getElementById('val-rotX');
+        const valRotY = document.getElementById('val-rotY');
+        const valRotZ = document.getElementById('val-rotZ');
+        const valScale = document.getElementById('val-scale');
+
+        let isInternalTransformUpdate = false;
+
+        function updateTransformsFromSliders() {
+            if (isInternalTransformUpdate) return;
+            isInternalTransformUpdate = true;
+
+            const degX = parseInt(sliderRotX.value);
+            const degY = parseInt(sliderRotY.value);
+            const degZ = parseInt(sliderRotZ.value);
+            const scalePct = parseInt(sliderScale.value);
+
+            phoneGroup.rotation.z = THREE.MathUtils.degToRad(degZ);
+
+            const phi = THREE.MathUtils.degToRad(90 - degX);
+            const theta = THREE.MathUtils.degToRad(-degY);
+            const targetDistance = defaultCamDistance / (scalePct / 100);
+
+            camera.position.setFromSphericalCoords(targetDistance, phi, theta);
+            controls.update();
+
+            valRotX.innerText = `${degX}°`;
+            valRotY.innerText = `${degY}°`;
+            valRotZ.innerText = `${degZ}°`;
+            valScale.innerText = `${scalePct}%`;
+
+            isInternalTransformUpdate = false;
+        }
+
+        [sliderRotX, sliderRotY, sliderRotZ, sliderScale].forEach(sl => {
+            sl.addEventListener('input', updateTransformsFromSliders);
+        });
+
+        // --- 9. PRESET HUD ---
+        const maxPresetsCount = 8;
+        let studioPresetsRegistry = [];
+
+        function initializePresetsMatrix() {
+            const rawStored = localStorage.getItem('iphone_studio_presets_2026');
+            if (rawStored) {
+                try { studioPresetsRegistry = JSON.parse(rawStored); } catch(e) { generateFallbackPresets(); }
+            } else {
+                generateFallbackPresets();
+            }
+            renderPresetControlsHUD();
+        }
+
+        function generateFallbackPresets() {
+            studioPresetsRegistry = [
+                { id: 1, name: "Screen Frontal", x: 0, y: 0, z: 0, scale: 100 },
+                { id: 2, name: "Marketing Tilt", x: -19, y: 41, z: 9, scale: 100 },
+                { id: 3, name: "Isometric Left", x: 0, y: 45, z: 0, scale: 100 },
+                { id: 4, name: "Isometric Right", x: 0, y: -45, z: 0, scale: 110 }
+            ];
+            for (let i = 5; i <= maxPresetsCount; i++) {
+                studioPresetsRegistry.push({ id: i, name: `Custom Slot ${i}`, x: 0, y: 0, z: 0, scale: 100, isUnset: true });
+            }
+            savePresetsToLocalStorage();
+        }
+
+        function savePresetsToLocalStorage() {
+            localStorage.setItem('iphone_studio_presets_2026', JSON.stringify(studioPresetsRegistry));
+        }
+
+        function renderPresetControlsHUD() {
+            const outContainer = document.getElementById('presets-container');
+            outContainer.innerHTML = '';
+
+            studioPresetsRegistry.forEach(preset => {
+                const row = document.createElement('div');
+                row.className = 'preset-row';
+
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'preset-name-input';
+                nameInput.value = preset.name;
+                nameInput.addEventListener('change', (e) => {
+                    preset.name = e.target.value;
+                    if(preset.isUnset) delete preset.isUnset;
+                    savePresetsToLocalStorage();
+                });
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'btn-action btn-load';
+                loadBtn.innerText = 'Recall';
+                loadBtn.addEventListener('click', () => recallPresetAngles(preset));
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn-action btn-save';
+                saveBtn.innerText = 'Update';
+                saveBtn.addEventListener('click', () => overwritePresetSlot(preset, nameInput));
+
+                row.appendChild(nameInput);
+                row.appendChild(loadBtn);
+                row.appendChild(saveBtn);
+                outContainer.appendChild(row);
+            });
+        }
+
+        function recallPresetAngles(preset) {
+            sliderRotX.value = preset.x;
+            sliderRotY.value = preset.y;
+            sliderRotZ.value = preset.z;
+            sliderScale.value = preset.scale;
+            updateTransformsFromSliders();
+        }
+
+        function overwritePresetSlot(preset, connectedInputElement) {
+            preset.x = parseInt(sliderRotX.value);
+            preset.y = parseInt(sliderRotY.value);
+            preset.z = parseInt(sliderRotZ.value);
+            preset.scale = parseInt(sliderScale.value);
+            
+            if(preset.isUnset || preset.name.startsWith("Custom Slot")) {
+                preset.name = `Saved Position (${preset.x}°, ${preset.y}°)`;
+                connectedInputElement.value = preset.name;
+                delete preset.isUnset;
+            }
+            
+            savePresetsToLocalStorage();
+            connectedInputElement.style.color = '#30d158';
+            setTimeout(() => connectedInputElement.style.color = '#ffffff', 400);
+        }
+
+        // --- 10. DRAG & DROP TRACKING ENGINE ---
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        ['dragover', 'drop', 'dragleave'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => e.preventDefault());
+        });
+
+        dropZone.addEventListener('dragover', () => dropZone.style.borderColor = '#0071e3');
+        dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = 'rgba(255, 255, 255, 0.15)');
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            if (e.dataTransfer.files.length > 0) processImageFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) processImageFile(e.target.files[0]);
+        });
+
+        function processImageFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const nextTexture = new THREE.Texture(img);
+                    nextTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                    nextTexture.minFilter = THREE.LinearFilter;
+                    nextTexture.encoding = THREE.sRGBEncoding;
+                    nextTexture.needsUpdate = true;
+                    screenMat.map = nextTexture;
+                    screenMat.needsUpdate = true;
+                    dropZone.innerText = "Asset Confirmed!";
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- 11. IMAGE CAPTURE ---
+        document.getElementById('export-btn').addEventListener('click', () => {
+            renderer.render(scene, camera);
+            const rawUrl = renderer.domElement.toDataURL('image/png');
+            const anchor = document.createElement('a');
+            anchor.download = `sightline_canvas_${new Date().toISOString().slice(0,10)}.png`;
+            anchor.href = rawUrl;
+            anchor.click();
+        });
+
+        // --- 12. TICK EVENT RENDERING MATRIX LOOP ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        initializePresetsMatrix();
+        recallPresetAngles(studioPresetsRegistry[0]); // Front-facing default
+
+        function tick() {
+            requestAnimationFrame(tick);
+            controls.update();
+
+            if (!isInternalTransformUpdate) {
+                isInternalTransformUpdate = true;
+
+                const spherical = new THREE.Spherical().setFromVector3(camera.position);
+                let rawX = Math.round(90 - THREE.MathUtils.radToDeg(spherical.phi));
+                let rawY = Math.round(-THREE.MathUtils.radToDeg(spherical.theta));
+                let calculatedScale = Math.round((defaultCamDistance / spherical.radius) * 100);
+
+                if(rawX > 85) rawX = 85; if(rawX < -85) rawX = -85;
+                if(rawY > 180) rawY = 180; if(rawY < -180) rawY = -180;
+                if(calculatedScale > 170) calculatedScale = 170; if(calculatedScale < 30) calculatedScale = 30;
+
+                sliderRotX.value = rawX;
+                sliderRotY.value = rawY;
+                sliderScale.value = calculatedScale;
+
+                valRotX.innerText = `${rawX}°`;
+                valRotY.innerText = `${rawY}°`;
+                valScale.innerText = `${calculatedScale}%`;
+
+                isInternalTransformUpdate = false;
+            }
+
+            renderer.render(scene, camera);
+        }
+        tick();
+    </script>
+</body>
+</html>

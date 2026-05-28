@@ -1,32 +1,34 @@
-# Premium 3D iPhone App Store Studio
+# Premium 3D App Store Screenshot Studio
 
-A high-performance, interactive 3D web application designed to help developers and designers generate stunning App Store screenshots and marketing assets effortlessly. Built entirely with HTML, CSS, and **Three.js**, this tool runs locally in your browser to render a photorealistic iPhone model with your own custom screenshots.
+A high-performance, interactive 3D web application to generate stunning App Store screenshots and marketing assets. Supports iPhone and iPad Pro 13". Built with HTML, CSS, and **Three.js** — runs locally in your browser.
 
-## ✨ Features and Benefits
+## Features
 
-- **Drag-and-Drop Texturing:** Instantly wrap your app screenshots onto the 3D iPhone model by simply dropping an image file onto the browser window.
-- **Precision Camera Control:** Use intuitive sliders to rotate the device across X, Y, and Z axes and adjust the studio zoom scale, offering limitless framing possibilities.
-- **Dynamic Studio Presets:** Store, rename, and quickly swap between up to 8 custom camera angles, saving time when generating consistent asset packs.
-- **Transparent PNG Export:** Capture crisp, transparent `.png` renders with a single click, ready to be dropped into your App Store layouts or marketing websites.
-- **Advanced Physical Materials:** Utilizes `MeshPhysicalMaterial` for highly accurate clearcoat glass surfaces, perfectly matching the titanium/aluminum edges, back glass plates, and frosted camera bumps.
-- **Detailed Hardware Elements:** Features deep optical lens simulations using light transmission, precise bezel rounding, dynamic islands, and bottom-edge speaker/microphone grilles.
-- **Photorealistic Lighting:** Pre-configured high-resolution soft shadow maps (PCFSoftShadowMap), directional studio lighting, and HDR tone mapping ensure your renders look incredibly premium without blowing out true colors.
-- **No Installation Required:** Runs entirely in any modern web browser—no complex 3D software or heavy installation needed.
+- **Dual Device Support:** Toggle between iPhone and iPad Pro 13" with per-device geometry, camera bump, and presets.
+- **Drag-and-Drop Texturing:** Instantly wrap app screenshots onto the 3D model by dropping an image onto the browser window.
+- **Precision Camera Control:** Intuitive sliders for X/Y/Z rotation and studio zoom scale.
+- **Dynamic Studio Presets:** Store, rename, and recall up to 8 camera angles per device (separate localStorage keys).
+- **Transparent PNG Export:** Capture crisp transparent `.png` renders with one click.
+- **Advanced Physical Materials:** `MeshPhysicalMaterial` with clearcoat, metalness, and roughness matching titanium/aluminum edges and back glass.
+- **Detailed Hardware:** Optical lens simulation with light transmission, Dynamic Island (iPhone), speaker grilles, side buttons, Apple logo with leaf geometry.
+- **Photorealistic Lighting:** Directional studio lighting, HDR tone mapping, PCFSoftShadowMap.
+- **No Installation Required:** Open in any modern browser.
 
-## 🚀 How to Use
+## How to Use
 
-1. Open `iPhone.html` in any modern web browser.
-2. Drag and drop your app screenshot (or use the file picker) to apply it to the device screen.
-3. Use your mouse to rotate and inspect the 3D model, or fine-tune the exact angle using the **Canvas Transformation** sliders.
-4. Save your favorite angles using the **Dynamic Studio Presets** panel to reuse them later.
-5. Click **Capture Transparent PNG** to export a high-resolution, transparent image.
+1. Open `iOS.html` in any modern browser.
+2. Click **iPhone** or **iPad** to switch devices.
+3. Drag and drop a screenshot onto the device screen.
+4. Use mouse to orbit, or fine-tune angle with **Canvas Transformation** sliders.
+5. Save favorite angles with **Dynamic Studio Presets**.
+6. Click **Capture Transparent PNG** to export.
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **HTML5 / CSS3** (Vanilla, Glassmorphism UI)
-- **Three.js** (WebGL 3D Engine)
-- **OrbitControls** (Camera interactions)
+- **HTML5 / CSS3** — Glassmorphism UI
+- **Three.js** (r128) — WebGL 3D engine
+- **OrbitControls** — Camera interaction
 
-## 📄 License
+## License
 
-This project is open-sourced under the MIT License. Feel free to use, modify, and distribute it for your own projects.
+MIT

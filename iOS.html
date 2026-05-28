@@ -161,6 +161,31 @@
             display: none;
         }
 
+        .device-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            color: #aeaea2;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .device-btn.active {
+            background: #0071e3;
+            color: #ffffff;
+            border-color: #0071e3;
+        }
+
+        .device-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
         .drop-zone {
             border: 2px dashed rgba(255, 255, 255, 0.15);
             border-radius: 10px;
@@ -269,6 +294,11 @@
         <div class="panel">
             <h1>Studio Canvas Engine</h1>
             <p>Precise asset control and image generation.</p>
+
+            <div class="control-group" style="display:flex; gap:8px; margin-bottom:15px;">
+                <button class="device-btn active" id="btn-iphone">iPhone</button>
+                <button class="device-btn" id="btn-ipad">iPad</button>
+            </div>
 
             <div class="control-group">
                 <label>1. Texture Source</label>
@@ -381,10 +411,46 @@
         backFillLight.position.set(-6, -4, -10);
         scene.add(backFillLight);
 
-        // --- 4. PROCEDURAL CANVAS GENERATORS ---
-        function createDefaultScreenTexture() {
+        // --- 4. DEVICE SPECS ---
+        const DEVICE_SPECS = {
+            iphone: {
+                w: 7.15, h: 14.66, d: 0.74, r: 0.95,
+                bezelPadding: 0.24,
+                canvasW: 1179, canvasH: 2556,
+                hasDynamicIsland: true,
+                hasCameraArray: true,
+                logoY: -0.5,
+                bumpCenterX: 1.48, bumpCenterY: 5.10,
+                presetKey: 'iphone_studio_presets_2026',
+                defaultPresets: [
+                    { name: "Screen Frontal", x: 0, y: 0, z: 0, scale: 100 },
+                    { name: "Marketing Tilt", x: -19, y: 41, z: 9, scale: 100 },
+                    { name: "Isometric Left", x: 0, y: 45, z: 0, scale: 100 },
+                    { name: "Isometric Right", x: 0, y: -45, z: 0, scale: 110 }
+                ]
+            },
+            ipad: {
+                w: 9.7, h: 12.68, d: 0.64, r: 0.6,
+                bezelPadding: 0.3,
+                canvasW: 2064, canvasH: 2752,
+                hasDynamicIsland: false,
+                hasCameraArray: false,
+                logoY: 0,
+                bumpCenterX: 4, bumpCenterY: 5.2,
+                presetKey: 'ipad_studio_presets_2026',
+                defaultPresets: [
+                    { name: "Screen Frontal", x: 0, y: 0, z: 0, scale: 100 },
+                    { name: "Marketing Tilt", x: -19, y: 41, z: 9, scale: 100 },
+                    { name: "Top Down", x: -85, y: 0, z: 0, scale: 100 },
+                    { name: "Isometric Right", x: 0, y: -45, z: 0, scale: 110 }
+                ]
+            }
+        };
+
+        // --- 5. PROCEDURAL CANVAS GENERATORS ---
+        function createDefaultScreenTexture(canvasW, canvasH) {
             const canvas = document.createElement('canvas');
-            canvas.width = 1179; canvas.height = 2556;
+            canvas.width = canvasW; canvas.height = canvasH;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#0b0b0e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#bfa17f'; ctx.font = 'bold 70px -apple-system, BlinkMacSystemFont, sans-serif';
@@ -394,13 +460,12 @@
             return tex;
         }
 
-        let screenTexture = createDefaultScreenTexture();
+        let screenTexture = createDefaultScreenTexture(DEVICE_SPECS.iphone.canvasW, DEVICE_SPECS.iphone.canvasH);
 
-        // --- 5. CHASSIS DEVICE GEOMETRY ---
+        let screenMat = null; // Updated in buildDevice
+        let currentDevice = 'iphone';
         const phoneGroup = new THREE.Group();
         scene.add(phoneGroup);
-
-        const w = 7.15, h = 14.66, d = 0.74, r = 0.95;
 
         function createRoundedRectShape(width, height, radius) {
             const shape = new THREE.Shape();
@@ -412,135 +477,37 @@
             return shape;
         }
 
-        const chassisShape = createRoundedRectShape(w, h, r);
-        const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, {
-            depth: d, bevelEnabled: true, bevelSegments: 8, steps: 1, bevelSize: 0.04, bevelThickness: 0.04
-        });
-        chassisGeo.center();
-
-        const chassisMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, metalness: 0.9, roughness: 0.15, clearcoat: 0.1, clearcoatRoughness: 0.2 });
-        const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-        chassis.castShadow = true;
-        chassis.receiveShadow = true;
-        phoneGroup.add(chassis);
-
-        // USB-C Port
-        const darkPortMat = new THREE.MeshBasicMaterial({ color: 0x1d1814 });
-        const usbcMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.2), darkPortMat);
-        usbcMesh.position.set(0, -(h / 2) - 0.02, 0);
-        phoneGroup.add(usbcMesh);
-
-        // Bottom Speaker & Mic Grilles
-        const holeGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.1, 16);
-        for (let i = 0; i < 4; i++) {
-            // Left side holes
-            const leftHole = new THREE.Mesh(holeGeo, darkPortMat);
-            leftHole.position.set(-0.65 - i * 0.25, -(h / 2) - 0.01, 0);
-            phoneGroup.add(leftHole);
-
-            // Right side holes
-            const rightHole = new THREE.Mesh(holeGeo, darkPortMat);
-            rightHole.position.set(0.65 + i * 0.25, -(h / 2) - 0.01, 0);
-            phoneGroup.add(rightHole);
-        }
-
-        // Front Screen Panel Layout
-        const bezelPadding = 0.24;
-        const screenW = w - bezelPadding; const screenH = h - bezelPadding;
-        const screenR = r - (bezelPadding / 2);
-        const targetScreenShape = createRoundedRectShape(screenW, screenH, screenR);
-
-        const screenGeo = new THREE.ShapeGeometry(targetScreenShape);
-        const posAttribute = screenGeo.attributes.position;
-        const uvs = [];
-        for (let i = 0; i < posAttribute.count; i++) {
-            uvs.push((posAttribute.getX(i) / screenW) + 0.5, (posAttribute.getY(i) / screenH) + 0.5);
-        }
-        screenGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-
-        const screenMat = new THREE.MeshStandardMaterial({ map: screenTexture, roughness: 0.18, metalness: 0.0, side: THREE.DoubleSide });
-        const screenMesh = new THREE.Mesh(screenGeo, screenMat);
-        screenMesh.position.z = (d / 2) + 0.05;
-        phoneGroup.add(screenMesh);
-
-        // Dynamic Island
-        const islandShapeObj = new THREE.Shape();
-        const iW = 1.68, iH = 0.42, iR = 0.21;
-        islandShapeObj.moveTo(-iW / 2 + iR, -iH / 2); islandShapeObj.lineTo(iW / 2 - iR, -iH / 2);
-        islandShapeObj.quadraticCurveTo(iW / 2, -iH / 2, iW / 2, -iH / 2 + iR); islandShapeObj.lineTo(iW / 2, iH / 2 - iR);
-        islandShapeObj.quadraticCurveTo(iW / 2, iH / 2, iW / 2 - iR, iH / 2); islandShapeObj.lineTo(-iW / 2 + iR, iH / 2);
-        islandShapeObj.quadraticCurveTo(-iW / 2, iH / 2, -iW / 2, iH / 2 - iR); islandShapeObj.lineTo(-iW / 2, -iH / 2 + iR);
-        islandShapeObj.quadraticCurveTo(-iW / 2, -iH / 2, -iW / 2 + iR, -iH / 2);
-
-        const islandMesh = new THREE.Mesh(new THREE.ShapeGeometry(islandShapeObj), new THREE.MeshBasicMaterial({ color: 0x070709, side: THREE.DoubleSide }));
-        islandMesh.position.set(0, h / 2 - 1.02, (d / 2) + 0.055);
-        phoneGroup.add(islandMesh);
-
-
-        // --- 6. ISOLATED BACK PLATE & LOGO GEOMETRY ---
-        const backPanelGeo = new THREE.ShapeGeometry(targetScreenShape);
-        const backPanelMat = new THREE.MeshPhysicalMaterial({
-            color: 0xbfae99,
-            roughness: 0.15,
-            metalness: 0.9,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.1,
-            side: THREE.DoubleSide
-        });
-        const backPanelMesh = new THREE.Mesh(backPanelGeo, backPanelMat);
-        backPanelMesh.rotation.y = Math.PI;
-        backPanelMesh.position.set(0, 0, -(d / 2) - 0.05);
-        backPanelMesh.receiveShadow = true;
-        backPanelMesh.castShadow = true;
-        phoneGroup.add(backPanelMesh);
-
+        // Apple logo shapes (device-independent)
         function createAppleLogoShape() {
             const shape = new THREE.Shape();
-
-            // Scale factor and centering offsets derived from the AI vector grid
             const S = 0.003;
             const transformX = (x) => (x - 1900) * S;
             const transformY = (y) => (y - 800) * S;
 
-            // Start at the bottom central dip
             shape.moveTo(transformX(2266), transformY(1570));
-
-            // Top-Right Shoulder
             shape.bezierCurveTo(transformX(2384.7), transformY(1571.4), transformX(2473.9), transformY(1531.1), transformX(2549), transformY(1488));
             shape.bezierCurveTo(transformX(2564.5), transformY(1479.0), transformX(2576.6), transformY(1463.1), transformX(2591), transformY(1453));
             shape.bezierCurveTo(transformX(2612.2), transformY(1438.0), transformX(2629.4), transformY(1416.7), transformX(2645), transformY(1396));
             shape.bezierCurveTo(transformX(2647.5), transformY(1392.6), transformX(2659.6), transformY(1382.6), transformX(2658), transformY(1377));
             shape.bezierCurveTo(transformX(2647.6), transformY(1370.6), transformX(2637.3), transformY(1364.3), transformX(2627), transformY(1358));
             shape.bezierCurveTo(transformX(2601.5), transformY(1342.1), transformX(2572.3), transformY(1317.5), transformX(2553), transformY(1295));
-
-            // The Bite Cutout (Traced directly into the path outline)
             shape.bezierCurveTo(transformX(2476.5), transformY(1205.8), transformX(2419.2), transformY(1079.8), transformX(2457), transformY(911));
             shape.bezierCurveTo(transformX(2477.5), transformY(819.0), transformX(2534.1), transformY(741.9), transformX(2597), transformY(691));
             shape.bezierCurveTo(transformX(2619.9), transformY(672.4), transformX(2648.1), transformY(650.0), transformX(2676), transformY(638));
             shape.bezierCurveTo(transformX(2685.2), transformY(633.9), transformX(2707.4), transformY(629.2), transformX(2709), transformY(618));
-
-            // Bottom-Right Lobe
             shape.bezierCurveTo(transformX(2675.0), transformY(531.7), transformX(2641.6), transformY(451.6), transformX(2595), transformY(379));
             shape.bezierCurveTo(transformX(2569.0), transformY(338.6), transformX(2536.5), transformY(302.3), transformX(2509), transformY(264));
             shape.bezierCurveTo(transformX(2473.5), transformY(214.6), transformX(2423.9), transformY(160.8), transformX(2365), transformY(136));
             shape.bezierCurveTo(transformX(2289.1), transformY(104.0), transformX(2204.8), transformY(116.6), transformX(2133), transformY(144));
-
-            // Bottom Central Base
             shape.bezierCurveTo(transformX(2071.0), transformY(169.0), transformX(2037.6), transformY(178.3), transformX(1967), transformY(189));
             shape.bezierCurveTo(transformX(1912.0), transformY(187.0), transformX(1875.4), transformY(181.4), transformX(1817), transformY(169));
-
-            // Bottom-Left Lobe
             shape.bezierCurveTo(transformX(1745.7), transformY(148.0), transformX(1670.2), transformY(95.0), transformX(1571), transformY(117));
             shape.bezierCurveTo(transformX(1488.8), transformY(135.1), transformX(1417.3), transformY(212.8), transformX(1374), transformY(272));
             shape.bezierCurveTo(transformX(1346.2), transformY(309.8), transformX(1315.3), transformY(347.0), transformX(1288), transformY(386));
             shape.bezierCurveTo(transformX(1210.2), transformY(496.6), transformX(1153.8), transformY(651.0), transformX(1122), transformY(807));
-
-            // Left Side Swell
             shape.bezierCurveTo(transformX(1110.3), transformY(864.2), transformX(1104.0), transformY(925.3), transformX(1104), transformY(996));
             shape.bezierCurveTo(transformX(1104.3), transformY(1016.9), transformX(1104.6), transformY(1038.0), transformX(1105), transformY(1059));
             shape.bezierCurveTo(transformX(1112.6), transformY(1108.9), transformX(1118.1), transformY(1155.9), transformX(1131), transformY(1200));
-
-            // Top-Left Shoulder & Top Dip
             shape.bezierCurveTo(transformX(1181.0), transformY(1371.7), transformX(1301.4), transformY(1491.6), transformX(1469), transformY(1547));
             shape.bezierCurveTo(transformX(1502.3), transformY(1557.9), transformX(1539.5), transformY(1559.2), transformX(1578), transformY(1565));
             shape.bezierCurveTo(transformX(1620.4), transformY(1571.3), transformX(1660.8), transformY(1556.8), transformX(1692), transformY(1549));
@@ -549,172 +516,298 @@
             shape.bezierCurveTo(transformX(2044.7), transformY(1514.0), transformX(2099.5), transformY(1538.3), transformX(2162), transformY(1556));
             shape.bezierCurveTo(transformX(2186.3), transformY(1559.9), transformX(2210.6), transformY(1564.0), transformX(2235), transformY(1568));
             shape.bezierCurveTo(transformX(2245.3), transformY(1568.6), transformX(2255.6), transformY(1569.3), transformX(2266), transformY(1570));
-
             shape.closePath();
             return shape;
         }
 
         function createAppleLeafShape() {
             const shape = new THREE.Shape();
-
             const S = 0.003;
             const transformX = (x) => (x - 1900) * S;
-            const transformY = (y) => (y - 800) * S;
-
-            // Start at leaf base tip
-            shape.moveTo(transformX(2307), transformY(2021));
-
-            // Leaf profile curves
-            shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
-            shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
-            shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
-            shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
-            shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
-
-            shape.closePath();
-            return shape;
-        }
-
-        function createAppleLeafShape() {
-            const shape = new THREE.Shape();
-
-            const S = 0.003;
-            const transformX = (x) => (x - 1900) * S;
-            // Decreased from 800 to 760 to shift the leaf up slightly
             const transformY = (y) => (y - 760) * S;
-
-            // Start at leaf base tip [cite: 1]
             shape.moveTo(transformX(2307), transformY(2021));
-
-            // Leaf profile curves [cite: 1]
             shape.bezierCurveTo(transformX(2311.7), transformY(1820.7), transformX(2221.2), transformY(1707.8), transformX(2103), transformY(1625));
             shape.bezierCurveTo(transformX(2063.1), transformY(1597.0), transformX(1983.5), transformY(1555.7), transformX(1908), transformY(1570));
             shape.bezierCurveTo(transformX(1900.3), transformY(1743.8), transformX(1984.1), transformY(1866.7), transformX(2084), transformY(1939));
             shape.bezierCurveTo(transformX(2101.3), transformY(1948.9), transformX(2118.6), transformY(1959.0), transformX(2136), transformY(1969));
             shape.bezierCurveTo(transformX(2179.0), transformY(1995.8), transformX(2240.2), transformY(2021.1), transformX(2307), transformY(2021));
-
             shape.closePath();
             return shape;
         }
 
-
-        const logoScale = 0.35;
-        const logoGroup = new THREE.Group();
-        const logoMat = new THREE.MeshStandardMaterial({ color: 0x615444, roughness: 0.15, metalness: 0.85 });
-
-        const logoBodyGeo = new THREE.ExtrudeGeometry(createAppleLogoShape(), { depth: 0.02, bevelEnabled: false });
-        const logoLeafGeo = new THREE.ExtrudeGeometry(createAppleLeafShape(), { depth: 0.02, bevelEnabled: false });
-
-        const logoBodyMesh = new THREE.Mesh(logoBodyGeo, logoMat);
-        const logoLeafMesh = new THREE.Mesh(logoLeafGeo, logoMat);
-
-        logoBodyMesh.position.z = -0.01;
-        logoLeafMesh.position.z = -0.01;
-
-        logoGroup.add(logoBodyMesh);
-        logoGroup.add(logoLeafMesh);
-        logoGroup.rotation.y = Math.PI;
-        logoGroup.scale.set(logoScale, logoScale, 1);
-        logoGroup.position.set(0, -0.5, -(d / 2) - 0.08);
-        phoneGroup.add(logoGroup);
-
-
-        // --- 7. CAMERA ARRAY PLATFORM & SENSOR REALIGNMENT ---
-        const camBumpW = 2.95, camBumpH = 2.95, camBumpR = 0.6;
-        const camBumpShape = new THREE.Shape();
-        camBumpShape.moveTo(-camBumpW / 2 + camBumpR, -camBumpH / 2);
-        camBumpShape.lineTo(camBumpW / 2 - camBumpR, -camBumpH / 2);
-        camBumpShape.quadraticCurveTo(camBumpW / 2, -camBumpH / 2, camBumpW / 2, -camBumpH / 2 + camBumpR);
-        camBumpShape.lineTo(camBumpW / 2, camBumpH / 2 - camBumpR);
-        camBumpShape.quadraticCurveTo(camBumpW / 2, camBumpH / 2, camBumpW / 2 - camBumpR, camBumpH / 2);
-        camBumpShape.lineTo(-camBumpW / 2 + camBumpR, camBumpH / 2);
-        camBumpShape.quadraticCurveTo(-camBumpW / 2, camBumpH / 2, -camBumpW / 2, camBumpH / 2 - camBumpR);
-        camBumpShape.lineTo(-camBumpW / 2, -camBumpH / 2 + camBumpR);
-        camBumpShape.quadraticCurveTo(-camBumpW / 2, -camBumpH / 2, -camBumpW / 2 + camBumpR, -camBumpH / 2);
-
-        const camBumpGeo = new THREE.ExtrudeGeometry(camBumpShape, { depth: 0.14, bevelEnabled: true, bevelSegments: 5, bevelSize: 0.02, bevelThickness: 0.02 });
-        camBumpGeo.center();
-        const camBumpMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, roughness: 0.15, metalness: 0.9, clearcoat: 0.8, clearcoatRoughness: 0.2 });
-        const camBumpMesh = new THREE.Mesh(camBumpGeo, camBumpMat);
-        camBumpMesh.castShadow = true;
-        camBumpMesh.receiveShadow = true;
-
-        // FIXED: Shifted from -1.48 to +1.48 to place the entire module on the TOP RIGHT
-        const bumpCenterX = 1.48;
-        const bumpCenterY = 5.10;
-        camBumpMesh.position.set(bumpCenterX, bumpCenterY, -(d / 2) - 0.07);
-        phoneGroup.add(camBumpMesh);
-
-        // Core Optics Module Engine
-        const lensBaseMat = new THREE.MeshPhysicalMaterial({ color: 0x090a0d, roughness: 0.35, metalness: 0.8 });
-        const lensChromeMat = new THREE.MeshPhysicalMaterial({ color: 0xd6cbbd, metalness: 1.0, roughness: 0.05 });
-        const deepGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x040608, roughness: 0.0, metalness: 0.1, transmission: 0.9, thickness: 0.5 });
-
-        function drawLensAssemblyNode(offsetX, offsetY) {
+        function drawLensAssemblyNode(offsetX, offsetY, bumpCX, bumpCY, depthVal, lensScale, zOffset) {
+            if (lensScale === undefined) lensScale = 1.0;
+            if (zOffset === undefined) zOffset = -0.07;
+            const s = lensScale;
             const assembly = new THREE.Group();
+            const lensBaseMat = new THREE.MeshPhysicalMaterial({ color: 0x090a0d, roughness: 0.35, metalness: 0.8 });
+            const lensChromeMat = new THREE.MeshPhysicalMaterial({ color: 0xd6cbbd, metalness: 1.0, roughness: 0.05 });
+            const deepGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x040608, roughness: 0.0, metalness: 0.1, transmission: 0.9, thickness: 0.5 });
 
-            // Outer Ring Chamfer Base
-            const bezelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.16, 36);
+            const bezelGeo = new THREE.CylinderGeometry(0.55 * s, 0.55 * s, 0.16, 36);
             bezelGeo.rotateX(Math.PI / 2);
             const bezelMesh = new THREE.Mesh(bezelGeo, lensChromeMat);
             bezelMesh.position.z = -0.08;
             bezelMesh.castShadow = true; bezelMesh.receiveShadow = true;
             assembly.add(bezelMesh);
 
-            // Dark Internal Stepped Well
-            const innerGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.14, 32);
+            const innerGeo = new THREE.CylinderGeometry(0.48 * s, 0.48 * s, 0.14, 32);
             innerGeo.rotateX(Math.PI / 2);
             const innerMesh = new THREE.Mesh(innerGeo, lensBaseMat);
             innerMesh.position.z = -0.09;
             innerMesh.castShadow = true; innerMesh.receiveShadow = true;
             assembly.add(innerMesh);
 
-            // High-index Layer Glass Lens element
-            const glassGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.03, 24);
+            const glassGeo = new THREE.CylinderGeometry(0.34 * s, 0.34 * s, 0.03, 24);
             glassGeo.rotateX(Math.PI / 2);
             const glassMesh = new THREE.Mesh(glassGeo, deepGlassMat);
             glassMesh.position.z = -0.15;
             glassMesh.castShadow = true; glassMesh.receiveShadow = true;
             assembly.add(glassMesh);
 
-            // Deep Core Aperture Pupil
-            const pupilGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.01, 16);
+            const pupilGeo = new THREE.CylinderGeometry(0.14 * s, 0.14 * s, 0.01, 16);
             pupilGeo.rotateX(Math.PI / 2);
             const pupilMesh = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x0b0d10 }));
             pupilMesh.position.z = -0.16;
             assembly.add(pupilMesh);
 
-            assembly.position.set(bumpCenterX + offsetX, bumpCenterY + offsetY, -(d / 2) - 0.07);
+            assembly.position.set(bumpCX + offsetX, bumpCY + offsetY, -(depthVal / 2) + zOffset);
             phoneGroup.add(assembly);
         }
 
-        // FIXED: Mirrored X offsets so dual lenses are on the RIGHT and single is on the LEFT
-        drawLensAssemblyNode(0.64, 0.64);     // Telephoto Lens (Top Right)
-        drawLensAssemblyNode(0.64, -0.64);    // Main Wide Lens (Bottom Right)
-        drawLensAssemblyNode(-0.58, 0.0);     // Ultra Wide Lens (Middle Left)
+        // --- 6. BUILD DEVICE ---
+        function buildDevice(spec) {
+            while (phoneGroup.children.length > 0) {
+                const child = phoneGroup.children[0];
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material.dispose();
+                }
+                phoneGroup.remove(child);
+            }
 
-        // FIXED: Mirrored Flash Node Position to (Top Left)
-        const flashGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.02, 24);
-        flashGeo.rotateX(Math.PI / 2);
-        const flashMat = new THREE.MeshStandardMaterial({ color: 0xfdfbf7, roughness: 0.4, metalness: 0.1, emissive: 0x1c1c0a });
-        const flashMesh = new THREE.Mesh(flashGeo, flashMat);
-        flashMesh.position.set(bumpCenterX - 0.54, bumpCenterY + 0.96, -(d / 2) - 0.15);
-        phoneGroup.add(flashMesh);
+            const { w, h, d, r } = spec;
 
-        // FIXED: Mirrored LiDAR Sensor Node Location to (Bottom Left)
-        const lidarGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.02, 24);
-        lidarGeo.rotateX(Math.PI / 2);
-        const lidarMat = new THREE.MeshStandardMaterial({ color: 0x18191d, roughness: 0.45, metalness: 0.6 });
-        const lidarMesh = new THREE.Mesh(lidarGeo, lidarMat);
-        lidarMesh.position.set(bumpCenterX - 0.54, bumpCenterY - 0.88, -(d / 2) - 0.15);
-        phoneGroup.add(lidarMesh);
+            // Chassis
+            const chassisShape = createRoundedRectShape(w, h, r);
+            const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, {
+                depth: d, bevelEnabled: true, bevelSegments: 8, steps: 1, bevelSize: 0.04, bevelThickness: 0.04
+            });
+            chassisGeo.center();
 
-        // FIXED: Mirrored Ambient System Audio Mic Pin-Hole to sit symmetrically between Left & Bottom lenses
-        const micGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.01, 12);
-        micGeo.rotateX(Math.PI / 2);
-        const micMesh = new THREE.Mesh(micGeo, new THREE.MeshBasicMaterial({ color: 0x1b1b1b }));
-        micMesh.position.set(bumpCenterX - 0.10, bumpCenterY - 0.56, -(d / 2) - 0.15);
-        phoneGroup.add(micMesh);
+            const chassisMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, metalness: 0.9, roughness: 0.15, clearcoat: 0.1, clearcoatRoughness: 0.2 });
+            const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+            chassis.castShadow = true;
+            chassis.receiveShadow = true;
+            phoneGroup.add(chassis);
+
+            // USB-C Port
+            const darkPortMat = new THREE.MeshBasicMaterial({ color: 0x1d1814 });
+            const usbcMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.2), darkPortMat);
+            usbcMesh.position.set(0, -(h / 2) - 0.02, 0);
+            phoneGroup.add(usbcMesh);
+
+            // Side Buttons (volume, power)
+            const btnMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, metalness: 0.85, roughness: 0.25 });
+
+            function addButton(x, y, bw, bh, bd) {
+                const btnShape = new THREE.Shape();
+                const br = Math.min(bw, bh) * 0.4;
+                btnShape.moveTo(-bw / 2 + br, -bh / 2); btnShape.lineTo(bw / 2 - br, -bh / 2);
+                btnShape.quadraticCurveTo(bw / 2, -bh / 2, bw / 2, -bh / 2 + br); btnShape.lineTo(bw / 2, bh / 2 - br);
+                btnShape.quadraticCurveTo(bw / 2, bh / 2, bw / 2 - br, bh / 2); btnShape.lineTo(-bw / 2 + br, bh / 2);
+                btnShape.quadraticCurveTo(-bw / 2, bh / 2, -bw / 2, bh / 2 - br); btnShape.lineTo(-bw / 2, -bh / 2 + br);
+                btnShape.quadraticCurveTo(-bw / 2, -bh / 2, -bw / 2 + br, -bh / 2);
+                const geo = new THREE.ExtrudeGeometry(btnShape, { depth: bd, bevelEnabled: false });
+                geo.center();
+                const mesh = new THREE.Mesh(geo, btnMat);
+                mesh.position.set(x, y, 0);
+                phoneGroup.add(mesh);
+            }
+
+            if (spec === DEVICE_SPECS.iphone) {
+                // iPhone: volume buttons on left edge, power on right edge
+                addButton(-(w / 2) - 0.02, 4.5, 0.08, 1.2, 0.08);
+                addButton(-(w / 2) - 0.02, 2.9, 0.08, 1.2, 0.08);
+                addButton((w / 2) + 0.02, 2.9, 0.08, 1.5, 0.08);
+            } else {
+                // iPad: volume buttons on right edge, power on top edge
+                addButton((w / 2) + 0.02, 3.5, 0.08, 1.4, 0.08);
+                addButton((w / 2) + 0.02, 1.8, 0.08, 1.4, 0.08);
+                addButton(0, (h / 2) + 0.02, 1.2, 0.08, 0.08);
+            }
+
+            // Speaker grilles
+            const holeGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.1, 16);
+            const isPortrait = h > w;
+
+            if (isPortrait) {
+                // iPhone style: bottom edge only
+                for (let i = 0; i < 4; i++) {
+                    const leftHole = new THREE.Mesh(holeGeo, darkPortMat);
+                    leftHole.position.set(-0.65 - i * 0.25, -(h / 2) - 0.01, 0);
+                    phoneGroup.add(leftHole);
+
+                    const rightHole = new THREE.Mesh(holeGeo, darkPortMat);
+                    rightHole.position.set(0.65 + i * 0.25, -(h / 2) - 0.01, 0);
+                    phoneGroup.add(rightHole);
+                }
+            }
+
+            // Front Screen Panel
+            const bezelP = spec.bezelPadding;
+            const screenW = w - bezelP; const screenH = h - bezelP;
+            const screenR = r - (bezelP / 2);
+            const targetScreenShape = createRoundedRectShape(screenW, screenH, screenR);
+
+            const screenGeo = new THREE.ShapeGeometry(targetScreenShape);
+            const posAttribute = screenGeo.attributes.position;
+            const uvs = [];
+            for (let i = 0; i < posAttribute.count; i++) {
+                uvs.push((posAttribute.getX(i) / screenW) + 0.5, (posAttribute.getY(i) / screenH) + 0.5);
+            }
+            screenGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+            screenMat = new THREE.MeshStandardMaterial({ map: screenTexture, roughness: 0.18, metalness: 0.0, side: THREE.DoubleSide });
+            const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+            screenMesh.position.z = (d / 2) + 0.05;
+            phoneGroup.add(screenMesh);
+
+            // Dynamic Island (iPhone only)
+            if (spec.hasDynamicIsland) {
+                const islandShapeObj = new THREE.Shape();
+                const iW = 1.68, iH = 0.42, iR = 0.21;
+                islandShapeObj.moveTo(-iW / 2 + iR, -iH / 2); islandShapeObj.lineTo(iW / 2 - iR, -iH / 2);
+                islandShapeObj.quadraticCurveTo(iW / 2, -iH / 2, iW / 2, -iH / 2 + iR); islandShapeObj.lineTo(iW / 2, iH / 2 - iR);
+                islandShapeObj.quadraticCurveTo(iW / 2, iH / 2, iW / 2 - iR, iH / 2); islandShapeObj.lineTo(-iW / 2 + iR, iH / 2);
+                islandShapeObj.quadraticCurveTo(-iW / 2, iH / 2, -iW / 2, iH / 2 - iR); islandShapeObj.lineTo(-iW / 2, -iH / 2 + iR);
+                islandShapeObj.quadraticCurveTo(-iW / 2, -iH / 2, -iW / 2 + iR, -iH / 2);
+
+                const islandMesh = new THREE.Mesh(new THREE.ShapeGeometry(islandShapeObj), new THREE.MeshBasicMaterial({ color: 0x070709, side: THREE.DoubleSide }));
+                islandMesh.position.set(0, h / 2 - 1.02, (d / 2) + 0.055);
+                phoneGroup.add(islandMesh);
+            }
+
+            // Back Panel
+            const backPanelGeo = new THREE.ShapeGeometry(targetScreenShape);
+            const backPanelMat = new THREE.MeshPhysicalMaterial({
+                color: 0xbfae99, roughness: 0.15, metalness: 0.9, clearcoat: 1.0, clearcoatRoughness: 0.1, side: THREE.DoubleSide
+            });
+            const backPanelMesh = new THREE.Mesh(backPanelGeo, backPanelMat);
+            backPanelMesh.rotation.y = Math.PI;
+            backPanelMesh.position.set(0, 0, -(d / 2) - 0.05);
+            backPanelMesh.receiveShadow = true;
+            backPanelMesh.castShadow = true;
+            phoneGroup.add(backPanelMesh);
+
+            // Apple Logo
+            const logoScale = 0.35;
+            const logoGroup = new THREE.Group();
+            const logoMat = new THREE.MeshStandardMaterial({ color: 0x615444, roughness: 0.15, metalness: 0.85 });
+
+            const logoBodyGeo = new THREE.ExtrudeGeometry(createAppleLogoShape(), { depth: 0.02, bevelEnabled: false });
+            const logoLeafGeo = new THREE.ExtrudeGeometry(createAppleLeafShape(), { depth: 0.02, bevelEnabled: false });
+
+            const logoBodyMesh = new THREE.Mesh(logoBodyGeo, logoMat);
+            const logoLeafMesh = new THREE.Mesh(logoLeafGeo, logoMat);
+
+            logoBodyMesh.position.z = -0.01;
+            logoLeafMesh.position.z = -0.01;
+
+            logoGroup.add(logoBodyMesh);
+            logoGroup.add(logoLeafMesh);
+            logoGroup.rotation.y = Math.PI;
+            logoGroup.scale.set(logoScale, logoScale, 1);
+            logoGroup.position.set(0, spec.logoY, -(d / 2) - 0.08);
+            phoneGroup.add(logoGroup);
+
+            // Camera Section
+            if (spec.hasCameraArray) {
+                // iPhone: 3-lens bump
+                const camBumpW = 2.95, camBumpH = 2.95, camBumpR = 0.6;
+                const camBumpShape = new THREE.Shape();
+                camBumpShape.moveTo(-camBumpW / 2 + camBumpR, -camBumpH / 2);
+                camBumpShape.lineTo(camBumpW / 2 - camBumpR, -camBumpH / 2);
+                camBumpShape.quadraticCurveTo(camBumpW / 2, -camBumpH / 2, camBumpW / 2, -camBumpH / 2 + camBumpR);
+                camBumpShape.lineTo(camBumpW / 2, camBumpH / 2 - camBumpR);
+                camBumpShape.quadraticCurveTo(camBumpW / 2, camBumpH / 2, camBumpW / 2 - camBumpR, camBumpH / 2);
+                camBumpShape.lineTo(-camBumpW / 2 + camBumpR, camBumpH / 2);
+                camBumpShape.quadraticCurveTo(-camBumpW / 2, camBumpH / 2, -camBumpW / 2, camBumpH / 2 - camBumpR);
+                camBumpShape.lineTo(-camBumpW / 2, -camBumpH / 2 + camBumpR);
+                camBumpShape.quadraticCurveTo(-camBumpW / 2, -camBumpH / 2, -camBumpW / 2 + camBumpR, -camBumpH / 2);
+
+                const camBumpGeo = new THREE.ExtrudeGeometry(camBumpShape, { depth: 0.14, bevelEnabled: true, bevelSegments: 5, bevelSize: 0.02, bevelThickness: 0.02 });
+                camBumpGeo.center();
+                const camBumpMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, roughness: 0.15, metalness: 0.9, clearcoat: 0.8, clearcoatRoughness: 0.2 });
+                const camBumpMesh = new THREE.Mesh(camBumpGeo, camBumpMat);
+                camBumpMesh.castShadow = true;
+                camBumpMesh.receiveShadow = true;
+                camBumpMesh.position.set(spec.bumpCenterX, spec.bumpCenterY, -(d / 2) - 0.07);
+                phoneGroup.add(camBumpMesh);
+
+                const bCX = spec.bumpCenterX, bCY = spec.bumpCenterY;
+                drawLensAssemblyNode(0.64, 0.64, bCX, bCY, d);
+                drawLensAssemblyNode(0.64, -0.64, bCX, bCY, d);
+                drawLensAssemblyNode(-0.58, 0.0, bCX, bCY, d);
+
+                const flashMat = new THREE.MeshStandardMaterial({ color: 0xfdfbf7, roughness: 0.4, metalness: 0.1, emissive: 0x1c1c0a });
+                const flashMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.02, 24), flashMat);
+                flashMesh.geometry.rotateX(Math.PI / 2);
+                flashMesh.position.set(bCX - 0.54, bCY + 0.96, -(d / 2) - 0.15);
+                phoneGroup.add(flashMesh);
+
+                const lidarMat = new THREE.MeshStandardMaterial({ color: 0x18191d, roughness: 0.45, metalness: 0.6 });
+                const lidarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.02, 24), lidarMat);
+                lidarMesh.geometry.rotateX(Math.PI / 2);
+                lidarMesh.position.set(bCX - 0.54, bCY - 0.88, -(d / 2) - 0.15);
+                phoneGroup.add(lidarMesh);
+
+                const micMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.01, 12), new THREE.MeshBasicMaterial({ color: 0x1b1b1b }));
+                micMesh.geometry.rotateX(Math.PI / 2);
+                micMesh.position.set(bCX - 0.10, bCY - 0.56, -(d / 2) - 0.15);
+                phoneGroup.add(micMesh);
+            } else {
+                // iPad: single lens bump (round, slightly bigger than lens)
+                const lensScale = 0.6;
+                const bumpRadius = 0.6 * lensScale;
+                const bumpGeo = new THREE.CylinderGeometry(bumpRadius, bumpRadius, 0.1, 20);
+                bumpGeo.rotateX(Math.PI / 2);
+                const bumpMat = new THREE.MeshPhysicalMaterial({ color: 0xbfae99, roughness: 0.15, metalness: 0.9, clearcoat: 0.8, clearcoatRoughness: 0.2 });
+                const bumpMesh = new THREE.Mesh(bumpGeo, bumpMat);
+                bumpMesh.position.set(spec.bumpCenterX, spec.bumpCenterY, -(d / 2) - 0.05);
+                phoneGroup.add(bumpMesh);
+
+                drawLensAssemblyNode(0, 0, spec.bumpCenterX, spec.bumpCenterY, d, 0.6, 0);
+            }
+        }
+
+        function switchDevice(device) {
+            if (device === currentDevice) return;
+            currentDevice = device;
+            const spec = DEVICE_SPECS[device];
+
+            // Update screen texture
+            screenTexture = createDefaultScreenTexture(spec.canvasW, spec.canvasH);
+
+            // Rebuild geometry
+            buildDevice(spec);
+
+            // Load presets for this device
+            initializePresetsMatrix(spec);
+
+            // Apply first preset
+            if (studioPresetsRegistry.length > 0) {
+                recallPresetAngles(studioPresetsRegistry[0]);
+            }
+
+            // Update button styling
+            document.getElementById('btn-iphone').classList.toggle('active', device === 'iphone');
+            document.getElementById('btn-ipad').classList.toggle('active', device === 'ipad');
+        }
+
+        // Initial build
+        buildDevice(DEVICE_SPECS.iphone);
 
         // --- 8. HUD INTERACTION LINK ---
         const sliderRotX = document.getElementById('slider-rotX');
@@ -763,31 +856,30 @@
         const maxPresetsCount = 8;
         let studioPresetsRegistry = [];
 
-        function initializePresetsMatrix() {
-            const rawStored = localStorage.getItem('iphone_studio_presets_2026');
+        function initializePresetsMatrix(spec) {
+            presetStorageKey = spec.presetKey;
+            const rawStored = localStorage.getItem(spec.presetKey);
             if (rawStored) {
-                try { studioPresetsRegistry = JSON.parse(rawStored); } catch (e) { generateFallbackPresets(); }
+                try { studioPresetsRegistry = JSON.parse(rawStored); } catch (e) { generateFallbackPresets(spec); }
             } else {
-                generateFallbackPresets();
+                generateFallbackPresets(spec);
             }
             renderPresetControlsHUD();
         }
 
-        function generateFallbackPresets() {
-            studioPresetsRegistry = [
-                { id: 1, name: "Screen Frontal", x: 0, y: 0, z: 0, scale: 100 },
-                { id: 2, name: "Marketing Tilt", x: -19, y: 41, z: 9, scale: 100 },
-                { id: 3, name: "Isometric Left", x: 0, y: 45, z: 0, scale: 100 },
-                { id: 4, name: "Isometric Right", x: 0, y: -45, z: 0, scale: 110 }
-            ];
-            for (let i = 5; i <= maxPresetsCount; i++) {
+        function generateFallbackPresets(spec) {
+            const defaults = spec.defaultPresets;
+            studioPresetsRegistry = defaults.map((p, i) => ({ id: i + 1, ...p }));
+            for (let i = defaults.length + 1; i <= maxPresetsCount; i++) {
                 studioPresetsRegistry.push({ id: i, name: `Custom Slot ${i}`, x: 0, y: 0, z: 0, scale: 100, isUnset: true });
             }
             savePresetsToLocalStorage();
         }
 
+        let presetStorageKey = DEVICE_SPECS.iphone.presetKey;
+
         function savePresetsToLocalStorage() {
-            localStorage.setItem('iphone_studio_presets_2026', JSON.stringify(studioPresetsRegistry));
+            localStorage.setItem(presetStorageKey, JSON.stringify(studioPresetsRegistry));
         }
 
         function renderPresetControlsHUD() {
@@ -906,8 +998,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        initializePresetsMatrix();
+        initializePresetsMatrix(DEVICE_SPECS.iphone);
         recallPresetAngles(studioPresetsRegistry[0]); // Front-facing default
+
+        // Device toggle handlers
+        document.getElementById('btn-iphone').addEventListener('click', () => switchDevice('iphone'));
+        document.getElementById('btn-ipad').addEventListener('click', () => switchDevice('ipad'));
 
         function tick() {
             requestAnimationFrame(tick);
